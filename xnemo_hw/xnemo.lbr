@@ -214,6 +214,7 @@
 <wire x1="1.5" y1="-1.5" x2="-1.5" y2="-1.5" width="0.127" layer="21"/>
 <wire x1="-1.5" y1="-1.5" x2="-1.5" y2="1.5" width="0.127" layer="21"/>
 <text x="-2.875" y="-3.25" size="1.27" layer="25">&gt;NAME</text>
+<circle x="-0.7" y="0.7" radius="0.180275" width="0.127" layer="21"/>
 </package>
 <package name="AD_LGA14_3X5">
 <smd name="P$1" x="-1.15" y="2" dx="0.55" dy="1.2" layer="1" rot="R90"/>

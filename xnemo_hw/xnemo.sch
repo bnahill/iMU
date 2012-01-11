@@ -153,6 +153,7 @@
 <wire x1="1.5" y1="-1.5" x2="-1.5" y2="-1.5" width="0.127" layer="21"/>
 <wire x1="-1.5" y1="-1.5" x2="-1.5" y2="1.5" width="0.127" layer="21"/>
 <text x="-2.875" y="-3.25" size="1.27" layer="25">&gt;NAME</text>
+<circle x="-0.7" y="0.7" radius="0.180275" width="0.127" layer="21"/>
 </package>
 <package name="AD_LGA14_3X5">
 <smd name="P$1" x="-1.15" y="2" dx="0.55" dy="1.2" layer="1" rot="R90"/>
@@ -6707,9 +6708,9 @@ type 0309, grid 2.5 mm</description>
 <label x="-38.1" y="83.82" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="U3" gate="G$1" pin="PB10"/>
-<wire x1="40.64" y1="-7.62" x2="40.64" y2="-15.24" width="0.1524" layer="91"/>
-<label x="40.64" y="-7.62" size="1.778" layer="95" rot="MR270"/>
+<pinref part="U3" gate="G$1" pin="PB11"/>
+<wire x1="43.18" y1="-7.62" x2="43.18" y2="-15.24" width="0.1524" layer="91"/>
+<label x="43.18" y="-7.62" size="1.778" layer="95" rot="MR270"/>
 </segment>
 </net>
 <net name="POW_HPWR" class="0">
@@ -6719,9 +6720,9 @@ type 0309, grid 2.5 mm</description>
 <label x="-38.1" y="86.36" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="U3" gate="G$1" pin="PB11"/>
-<wire x1="43.18" y1="-7.62" x2="43.18" y2="-15.24" width="0.1524" layer="91"/>
-<label x="43.18" y="-7.62" size="1.778" layer="95" rot="MR270"/>
+<pinref part="U3" gate="G$1" pin="PB10"/>
+<wire x1="40.64" y1="-7.62" x2="40.64" y2="-15.24" width="0.1524" layer="91"/>
+<label x="40.64" y="-7.62" size="1.778" layer="95" rot="MR270"/>
 </segment>
 </net>
 <net name="VBAT" class="0">
@@ -6967,14 +6968,14 @@ type 0309, grid 2.5 mm</description>
 <label x="30.48" y="55.88" size="1.778" layer="95" rot="R90"/>
 </segment>
 </net>
-<net name="N$5" class="0">
+<net name="VCAP_2" class="0">
 <segment>
 <pinref part="U3" gate="G$1" pin="VCAP_2"/>
 <pinref part="C11" gate="G$1" pin="1"/>
 <wire x1="60.96" y1="40.64" x2="68.58" y2="40.64" width="0.1524" layer="91"/>
 </segment>
 </net>
-<net name="N$17" class="0">
+<net name="VCAP_1" class="0">
 <segment>
 <pinref part="C10" gate="G$1" pin="1"/>
 <pinref part="U3" gate="G$1" pin="VCAP_1"/>
