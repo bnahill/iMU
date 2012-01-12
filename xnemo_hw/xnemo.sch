@@ -260,6 +260,24 @@
 <wire x1="-5.66" y1="-6.28" x2="-5.66" y2="5.12" width="0.127" layer="21"/>
 <text x="7.62" y="1.27" size="1.27" layer="25" rot="R90" align="top-right">&gt;NAME</text>
 </package>
+<package name="HEADER_2X5_0.05_THRU">
+<pad name="P$1" x="0.635" y="2.54" drill="0.6" diameter="1.016" rot="R270"/>
+<pad name="P$2" x="-0.635" y="2.54" drill="0.6" diameter="1.016" rot="R270"/>
+<pad name="P$3" x="0.635" y="1.27" drill="0.6" diameter="1.016" rot="R270"/>
+<pad name="P$4" x="-0.635" y="1.27" drill="0.6" diameter="1.016" rot="R270"/>
+<pad name="P$5" x="0.635" y="0" drill="0.6" diameter="1.016" rot="R270"/>
+<pad name="P$6" x="-0.635" y="0" drill="0.6" diameter="1.016" rot="R270"/>
+<pad name="P$7" x="0.635" y="-1.27" drill="0.6" diameter="1.016" rot="R270"/>
+<pad name="P$8" x="-0.635" y="-1.27" drill="0.6" diameter="1.016" rot="R270"/>
+<pad name="P$9" x="0.635" y="-2.54" drill="0.6" diameter="1.016" rot="R270"/>
+<pad name="P$10" x="-0.635" y="-2.54" drill="0.6" diameter="1.016" rot="R270"/>
+<wire x1="-1.524" y1="3.3655" x2="1.524" y2="3.3655" width="0.127" layer="21"/>
+<wire x1="1.524" y1="3.3655" x2="1.524" y2="-3.3655" width="0.127" layer="21"/>
+<wire x1="-1.524" y1="3.3655" x2="-1.524" y2="-3.3655" width="0.127" layer="21"/>
+<wire x1="-1.524" y1="-3.3655" x2="1.524" y2="-3.3655" width="0.127" layer="21"/>
+<text x="1.8415" y="1.8415" size="1.27" layer="21">1</text>
+<text x="0" y="-4.318" size="1.27" layer="25" align="top-center">&gt;NAME</text>
+</package>
 <package name="HEADER_2X5_0.05_SMD">
 <smd name="2" x="-2.032" y="2.54" dx="1.8542" dy="0.7366" layer="1" rot="R180"/>
 <smd name="1" x="2.032" y="2.54" dx="1.8542" dy="0.7366" layer="1"/>
@@ -792,7 +810,7 @@
 <gate name="G$1" symbol="HEADER_2X5" x="0" y="0"/>
 </gates>
 <devices>
-<device name="" package="HEADER_2X5_0.05_SMD">
+<device name="_0.05_SMD" package="HEADER_2X5_0.05_SMD">
 <connects>
 <connect gate="G$1" pin="1" pad="1"/>
 <connect gate="G$1" pin="10" pad="10"/>
@@ -804,6 +822,23 @@
 <connect gate="G$1" pin="7" pad="7"/>
 <connect gate="G$1" pin="8" pad="8"/>
 <connect gate="G$1" pin="9" pad="9"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="_0.05_THRU" package="HEADER_2X5_0.05_THRU">
+<connects>
+<connect gate="G$1" pin="1" pad="P$1"/>
+<connect gate="G$1" pin="10" pad="P$10"/>
+<connect gate="G$1" pin="2" pad="P$2"/>
+<connect gate="G$1" pin="3" pad="P$3"/>
+<connect gate="G$1" pin="4" pad="P$4"/>
+<connect gate="G$1" pin="5" pad="P$5"/>
+<connect gate="G$1" pin="6" pad="P$6"/>
+<connect gate="G$1" pin="7" pad="P$7"/>
+<connect gate="G$1" pin="8" pad="P$8"/>
+<connect gate="G$1" pin="9" pad="P$9"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -6122,7 +6157,7 @@ type 0309, grid 2.5 mm</description>
 <part name="U5" library="xnemo" deviceset="HMC5883L" device=""/>
 <part name="U6" library="xnemo" deviceset="ADXL345" device=""/>
 <part name="L1" library="xnemo" deviceset="NR4018" device=""/>
-<part name="C1" library="resistor" deviceset="C-EU" device="C0402"/>
+<part name="C1" library="resistor" deviceset="C-EU" device="C0402" value="10n"/>
 <part name="C2" library="resistor" deviceset="C-EU" device="C0402" value="0.22u"/>
 <part name="C3" library="resistor" deviceset="C-EU" device="C0805" value="4.7u"/>
 <part name="J1" library="xnemo" deviceset="MICRO_USB_B_RECEPT" device=""/>
@@ -6134,21 +6169,24 @@ type 0309, grid 2.5 mm</description>
 <part name="R1" library="resistor" deviceset="R-US_" device="R0402"/>
 <part name="R2" library="resistor" deviceset="R-US_" device="R0402"/>
 <part name="C7" library="resistor" deviceset="C-EU" device="C0603" value="1u"/>
-<part name="C8" library="resistor" deviceset="C-EU" device="C0805" value="2.2u"/>
-<part name="R3" library="resistor" deviceset="R-US_" device="R0402"/>
+<part name="C8" library="resistor" deviceset="C-EU" device="C0805" value="4.7u"/>
+<part name="R3" library="resistor" deviceset="R-US_" device="R0402" value="1.74k"/>
 <part name="J2" library="xnemo" deviceset="DM3D_MICRO_SD" device=""/>
-<part name="J3" library="xnemo" deviceset="HEADER_2X5" device=""/>
+<part name="J3" library="xnemo" deviceset="HEADER_2X5" device="_0.05_SMD"/>
 <part name="U2" library="xnemo" deviceset="L3GD20" device=""/>
 <part name="C9" library="resistor" deviceset="C-EU" device="C0603" value="2.2u"/>
 <part name="C10" library="resistor" deviceset="C-EU" device="C0603" value="2.2u"/>
 <part name="C11" library="resistor" deviceset="C-EU" device="C0603" value="2.2u"/>
 <part name="C12" library="resistor" deviceset="C-EU" device="C0603" value="2.2u"/>
-<part name="C13" library="resistor" deviceset="C-EU" device="C0402" value="100n"/>
-<part name="J4" library="xnemo" deviceset="HEADER_2X5" device=""/>
-<part name="J5" library="xnemo" deviceset="HEADER_2X5" device=""/>
+<part name="J4" library="xnemo" deviceset="HEADER_2X5" device="_0.05_THRU"/>
+<part name="J5" library="xnemo" deviceset="HEADER_2X5" device="_0.05_THRU"/>
 <part name="R5" library="resistor" deviceset="R-US_" device="R0402" value="22k"/>
 <part name="R6" library="resistor" deviceset="R-US_" device="R0402" value="22k"/>
 <part name="C14" library="resistor" deviceset="C-EU" device="C0402" value="22p"/>
+<part name="C15" library="resistor" deviceset="C-EU" device="C0402" value="220n"/>
+<part name="C16" library="resistor" deviceset="C-EU" device="C0805" value="10u"/>
+<part name="C17" library="resistor" deviceset="C-EU" device="C0805" value="10u"/>
+<part name="C18" library="resistor" deviceset="C-EU" device="C0402" value="100n"/>
 </parts>
 <sheets>
 <sheet>
@@ -6182,12 +6220,15 @@ type 0309, grid 2.5 mm</description>
 <instance part="C10" gate="G$1" x="45.72" y="-17.78"/>
 <instance part="C11" gate="G$1" x="71.12" y="40.64" rot="R90"/>
 <instance part="C12" gate="G$1" x="10.16" y="66.04" rot="R90"/>
-<instance part="C13" gate="G$1" x="109.22" y="-33.02" rot="R180"/>
 <instance part="J4" gate="G$1" x="22.86" y="-45.72"/>
 <instance part="J5" gate="G$1" x="-15.24" y="-43.18"/>
 <instance part="R5" gate="G$1" x="22.86" y="78.74" rot="R90"/>
 <instance part="R6" gate="G$1" x="25.4" y="86.36" rot="R90"/>
 <instance part="C14" gate="G$1" x="-76.2" y="55.88" rot="R90"/>
+<instance part="C15" gate="G$1" x="96.52" y="93.98"/>
+<instance part="C16" gate="G$1" x="88.9" y="91.44" rot="R180"/>
+<instance part="C17" gate="G$1" x="109.22" y="-33.02" rot="R180"/>
+<instance part="C18" gate="G$1" x="104.14" y="-22.86" rot="R90"/>
 </instances>
 <busses>
 </busses>
@@ -6242,24 +6283,31 @@ type 0309, grid 2.5 mm</description>
 <wire x1="101.6" y1="81.28" x2="101.6" y2="83.82" width="0.1524" layer="91"/>
 <wire x1="88.9" y1="68.58" x2="86.36" y2="68.58" width="0.1524" layer="91"/>
 <wire x1="86.36" y1="68.58" x2="86.36" y2="83.82" width="0.1524" layer="91"/>
-<wire x1="86.36" y1="83.82" x2="101.6" y2="83.82" width="0.1524" layer="91"/>
+<wire x1="86.36" y1="83.82" x2="88.9" y2="83.82" width="0.1524" layer="91"/>
+<wire x1="88.9" y1="83.82" x2="96.52" y2="83.82" width="0.1524" layer="91"/>
+<wire x1="96.52" y1="83.82" x2="101.6" y2="83.82" width="0.1524" layer="91"/>
 <wire x1="104.14" y1="83.82" x2="101.6" y2="83.82" width="0.1524" layer="91"/>
 <label x="91.44" y="83.82" size="1.778" layer="95"/>
 <pinref part="U2" gate="G$1" pin="VDD_IO"/>
 <pinref part="U2" gate="G$1" pin="RES@7"/>
 <pinref part="U2" gate="G$1" pin="VDD"/>
 <junction x="101.6" y="83.82"/>
+<pinref part="C16" gate="G$1" pin="1"/>
+<wire x1="88.9" y1="88.9" x2="88.9" y2="83.82" width="0.1524" layer="91"/>
+<pinref part="C15" gate="G$1" pin="2"/>
+<wire x1="96.52" y1="88.9" x2="96.52" y2="83.82" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="U6" gate="G$1" pin="VS"/>
 <wire x1="119.38" y1="-35.56" x2="109.22" y2="-35.56" width="0.1524" layer="91"/>
 <label x="119.38" y="-35.56" size="1.778" layer="95" rot="MR0"/>
-<pinref part="C13" gate="G$1" pin="1"/>
+<pinref part="C17" gate="G$1" pin="1"/>
 </segment>
 <segment>
 <pinref part="U6" gate="G$1" pin="VDDIO"/>
-<wire x1="119.38" y1="-22.86" x2="111.76" y2="-22.86" width="0.1524" layer="91"/>
+<wire x1="119.38" y1="-22.86" x2="109.22" y2="-22.86" width="0.1524" layer="91"/>
 <label x="119.38" y="-22.86" size="1.778" layer="95" rot="MR0"/>
+<pinref part="C18" gate="G$1" pin="2"/>
 </segment>
 <segment>
 <pinref part="C6" gate="G$1" pin="1"/>
@@ -6352,7 +6400,8 @@ type 0309, grid 2.5 mm</description>
 <wire x1="127" y1="60.96" x2="121.92" y2="60.96" width="0.1524" layer="91"/>
 <wire x1="121.92" y1="63.5" x2="127" y2="63.5" width="0.1524" layer="91"/>
 <wire x1="121.92" y1="66.04" x2="127" y2="66.04" width="0.1524" layer="91"/>
-<wire x1="109.22" y1="83.82" x2="127" y2="83.82" width="0.1524" layer="91"/>
+<wire x1="109.22" y1="83.82" x2="116.84" y2="83.82" width="0.1524" layer="91"/>
+<wire x1="116.84" y1="83.82" x2="127" y2="83.82" width="0.1524" layer="91"/>
 <wire x1="127" y1="83.82" x2="127" y2="68.58" width="0.1524" layer="91"/>
 <wire x1="111.76" y1="88.9" x2="109.22" y2="88.9" width="0.1524" layer="91"/>
 <label x="119.38" y="83.82" size="1.778" layer="95"/>
@@ -6370,6 +6419,15 @@ type 0309, grid 2.5 mm</description>
 <junction x="127" y="66.04"/>
 <junction x="127" y="63.5"/>
 <junction x="127" y="60.96"/>
+<pinref part="C16" gate="G$1" pin="2"/>
+<wire x1="88.9" y1="96.52" x2="88.9" y2="99.06" width="0.1524" layer="91"/>
+<wire x1="88.9" y1="99.06" x2="96.52" y2="99.06" width="0.1524" layer="91"/>
+<pinref part="C15" gate="G$1" pin="1"/>
+<wire x1="96.52" y1="99.06" x2="96.52" y2="96.52" width="0.1524" layer="91"/>
+<wire x1="96.52" y1="99.06" x2="116.84" y2="99.06" width="0.1524" layer="91"/>
+<wire x1="116.84" y1="99.06" x2="116.84" y2="83.82" width="0.1524" layer="91"/>
+<junction x="116.84" y="83.82"/>
+<junction x="96.52" y="99.06"/>
 </segment>
 <segment>
 <pinref part="U6" gate="G$1" pin="GND@2"/>
@@ -6381,11 +6439,15 @@ type 0309, grid 2.5 mm</description>
 <pinref part="U6" gate="G$1" pin="GND@1"/>
 <wire x1="119.38" y1="-25.4" x2="111.76" y2="-25.4" width="0.1524" layer="91"/>
 <wire x1="111.76" y1="-30.48" x2="111.76" y2="-27.94" width="0.1524" layer="91"/>
-<pinref part="C13" gate="G$1" pin="2"/>
 <wire x1="111.76" y1="-27.94" x2="111.76" y2="-25.4" width="0.1524" layer="91"/>
 <wire x1="109.22" y1="-27.94" x2="111.76" y2="-27.94" width="0.1524" layer="91"/>
 <junction x="111.76" y="-30.48"/>
 <junction x="111.76" y="-27.94"/>
+<pinref part="C17" gate="G$1" pin="2"/>
+<pinref part="C18" gate="G$1" pin="1"/>
+<wire x1="101.6" y1="-22.86" x2="99.06" y2="-22.86" width="0.1524" layer="91"/>
+<wire x1="99.06" y1="-22.86" x2="99.06" y2="-27.94" width="0.1524" layer="91"/>
+<wire x1="99.06" y1="-27.94" x2="109.22" y2="-27.94" width="0.1524" layer="91"/>
 </segment>
 <segment>
 <pinref part="J1" gate="G$1" pin="GND"/>
@@ -6560,7 +6622,7 @@ type 0309, grid 2.5 mm</description>
 <net name="SPI_CS_GYR" class="0">
 <segment>
 <wire x1="101.6" y1="48.26" x2="101.6" y2="43.18" width="0.1524" layer="91"/>
-<label x="101.6" y="48.26" size="1.778" layer="95" rot="R180"/>
+<label x="101.6" y="48.26" size="1.778" layer="95" rot="MR270"/>
 <pinref part="U2" gate="G$1" pin="CS"/>
 </segment>
 <segment>
@@ -6850,6 +6912,7 @@ type 0309, grid 2.5 mm</description>
 <segment>
 <pinref part="J4" gate="G$1" pin="6"/>
 <wire x1="17.78" y1="-45.72" x2="5.08" y2="-45.72" width="0.1524" layer="91"/>
+<label x="17.78" y="-45.72" size="1.778" layer="95" rot="MR0"/>
 </segment>
 </net>
 <net name="PC4" class="0">
@@ -7060,6 +7123,7 @@ type 0309, grid 2.5 mm</description>
 <segment>
 <pinref part="J4" gate="G$1" pin="8"/>
 <wire x1="17.78" y1="-48.26" x2="5.08" y2="-48.26" width="0.1524" layer="91"/>
+<label x="17.78" y="-48.26" size="1.778" layer="95" rot="MR0"/>
 </segment>
 </net>
 <net name="PA4" class="0">
@@ -7071,6 +7135,7 @@ type 0309, grid 2.5 mm</description>
 <segment>
 <pinref part="J4" gate="G$1" pin="10"/>
 <wire x1="17.78" y1="-50.8" x2="5.08" y2="-50.8" width="0.1524" layer="91"/>
+<label x="17.78" y="-50.8" size="1.778" layer="95" rot="MR0"/>
 </segment>
 </net>
 <net name="PC0" class="0">

@@ -339,6 +339,24 @@
 <text x="0" y="-4.953" size="1.27" layer="25" align="bottom-center">&gt;NAME</text>
 <text x="3.81" y="2.159" size="0.8128" layer="21" align="bottom-center">1</text>
 </package>
+<package name="HEADER_2X5_0.05_THRU">
+<pad name="P$1" x="0.635" y="2.54" drill="0.6" diameter="1.016" rot="R270"/>
+<pad name="P$2" x="-0.635" y="2.54" drill="0.6" diameter="1.016" rot="R270"/>
+<pad name="P$3" x="0.635" y="1.27" drill="0.6" diameter="1.016" rot="R270"/>
+<pad name="P$4" x="-0.635" y="1.27" drill="0.6" diameter="1.016" rot="R270"/>
+<pad name="P$5" x="0.635" y="0" drill="0.6" diameter="1.016" rot="R270"/>
+<pad name="P$6" x="-0.635" y="0" drill="0.6" diameter="1.016" rot="R270"/>
+<pad name="P$7" x="0.635" y="-1.27" drill="0.6" diameter="1.016" rot="R270"/>
+<pad name="P$8" x="-0.635" y="-1.27" drill="0.6" diameter="1.016" rot="R270"/>
+<pad name="P$9" x="0.635" y="-2.54" drill="0.6" diameter="1.016" rot="R270"/>
+<pad name="P$10" x="-0.635" y="-2.54" drill="0.6" diameter="1.016" rot="R270"/>
+<wire x1="-1.524" y1="3.3655" x2="1.524" y2="3.3655" width="0.127" layer="21"/>
+<wire x1="1.524" y1="3.3655" x2="1.524" y2="-3.3655" width="0.127" layer="21"/>
+<wire x1="-1.524" y1="3.3655" x2="-1.524" y2="-3.3655" width="0.127" layer="21"/>
+<wire x1="-1.524" y1="-3.3655" x2="1.524" y2="-3.3655" width="0.127" layer="21"/>
+<text x="1.8415" y="1.8415" size="1.27" layer="21">1</text>
+<text x="0" y="-4.318" size="1.27" layer="25" align="top-center">&gt;NAME</text>
+</package>
 </packages>
 <symbols>
 <symbol name="L3GD20">
@@ -1061,7 +1079,7 @@
 <gate name="G$1" symbol="HEADER_2X5" x="0" y="0"/>
 </gates>
 <devices>
-<device name="" package="HEADER_2X5_0.05_SMD">
+<device name="_0.05_SMD" package="HEADER_2X5_0.05_SMD">
 <connects>
 <connect gate="G$1" pin="1" pad="1"/>
 <connect gate="G$1" pin="10" pad="10"/>
@@ -1073,6 +1091,23 @@
 <connect gate="G$1" pin="7" pad="7"/>
 <connect gate="G$1" pin="8" pad="8"/>
 <connect gate="G$1" pin="9" pad="9"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+<device name="_0.05_THRU" package="HEADER_2X5_0.05_THRU">
+<connects>
+<connect gate="G$1" pin="1" pad="P$1"/>
+<connect gate="G$1" pin="10" pad="P$10"/>
+<connect gate="G$1" pin="2" pad="P$2"/>
+<connect gate="G$1" pin="3" pad="P$3"/>
+<connect gate="G$1" pin="4" pad="P$4"/>
+<connect gate="G$1" pin="5" pad="P$5"/>
+<connect gate="G$1" pin="6" pad="P$6"/>
+<connect gate="G$1" pin="7" pad="P$7"/>
+<connect gate="G$1" pin="8" pad="P$8"/>
+<connect gate="G$1" pin="9" pad="P$9"/>
 </connects>
 <technologies>
 <technology name=""/>
