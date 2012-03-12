@@ -1,0 +1,67 @@
+I2C1
+	Used by LSM303DLHC #1, STTS751
+	SCL = PB8
+	SDA = PB9
+
+I2C2
+	Used by LSM303DLHC #2
+	SCL = PB10
+	SDA = PB11
+	Exposed on header (for additional slaves)
+
+I2C3
+	Exposed on header (for use as I2C slave)
+	Conflict with SD card
+	SCL = PC8
+	SDA = PC9
+
+SPI1
+	Used by both L3GD20 (STM32 master, no hardware NSS used)
+	SCK = PA5
+	MOSI = PB5
+	MISO = PB4
+	CS1 = PA1
+	CS2 = PE15
+
+SPI2/I2S2
+	Exposed on header as master or slave
+	I2S MCK has conflict with DCMI
+	MOSI/SD = PB15
+	MISO/extSD = PB14
+	SCK/CK = PB13
+	NSS/WS = PB12
+	MCK = PC6 (shared with DCMI_D0)
+
+DCMI
+	Exposed on header
+	Conflict with I2S2
+	Provides 8-bit data bus
+	HSYNC = PA4
+	PIXCLK = PA6
+	VSYNC = PB7
+	D0 = PC6 (shared with I2S2)
+	D1 = PC7
+	D2 = PE0
+	D3 = PE1
+	D4 = PE4
+	D5 = PB6
+	D6 = PE5
+	D7 = PE6
+
+SDIO
+	Conflict with I2C3
+	CMD = PD2
+	CLK = PC12
+	DAT0 = PC8 (shared with I2C3)
+	DAT1 = PC9 (shared with I2C3)
+	DAT2 = PC10
+	DAT3 = PC11
+	DET = PD3 (Pulled to ground with card inserted)
+
+USART2
+	RX = PA3
+	TX = PA2
+
+USART3
+	RX = PD9
+	TX = PD8
