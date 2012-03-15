@@ -402,6 +402,20 @@
 <pad name="13" x="-1.27" y="-2.54" drill="0.6" diameter="1.016"/>
 <pad name="14" x="1.27" y="-2.54" drill="0.6" diameter="1.016"/>
 </package>
+<package name="ST_HLGA6">
+<smd name="6" x="1.1" y="1.5" dx="1" dy="1.4" layer="1" roundness="100" rot="R135"/>
+<smd name="2" x="-1.2" y="0" dx="1" dy="1" layer="1" roundness="100"/>
+<smd name="3" x="-1.2" y="-1.6" dx="1" dy="1" layer="1" roundness="100"/>
+<smd name="4" x="1.2" y="-1.6" dx="1" dy="1" layer="1" roundness="100" rot="R270"/>
+<smd name="5" x="1.2" y="0" dx="1" dy="1" layer="1" roundness="100"/>
+<smd name="1" x="-1.2" y="1.6" dx="1" dy="1" layer="1" roundness="100" rot="R90"/>
+<wire x1="1.9" y1="2.3" x2="-1.9" y2="2.3" width="0.127" layer="21"/>
+<wire x1="-1.9" y1="2.3" x2="-1.9" y2="-2.3" width="0.127" layer="21"/>
+<wire x1="-1.9" y1="-2.3" x2="1.9" y2="-2.3" width="0.127" layer="21"/>
+<wire x1="1.9" y1="-2.3" x2="1.9" y2="2.3" width="0.127" layer="21"/>
+<circle x="-1.5" y="3" radius="0.360553125" width="0.127" layer="21"/>
+<text x="0" y="-2.6" size="1.27" layer="25" rot="R180" align="bottom-center">&gt;NAME</text>
+</package>
 </packages>
 <symbols>
 <symbol name="L">
@@ -726,6 +740,20 @@
 <pin name="11" x="-5.08" y="-2.54" visible="off" length="short"/>
 <pin name="14" x="5.08" y="-5.08" visible="off" length="short" rot="R180"/>
 <pin name="13" x="-5.08" y="-5.08" visible="off" length="short"/>
+</symbol>
+<symbol name="MP45DT02">
+<pin name="GND@1" x="-10.16" y="2.54" visible="pin" length="short"/>
+<pin name="LR" x="-10.16" y="0" visible="pin" length="short"/>
+<pin name="GND@2" x="-10.16" y="-2.54" visible="pin" length="short"/>
+<pin name="CLK" x="10.16" y="-2.54" visible="pin" length="short" rot="R180"/>
+<pin name="DOUT" x="10.16" y="0" visible="pin" length="short" rot="R180"/>
+<pin name="VDD" x="10.16" y="2.54" visible="pin" length="short" rot="R180"/>
+<wire x1="-7.62" y1="5.08" x2="7.62" y2="5.08" width="0.254" layer="94"/>
+<wire x1="7.62" y1="5.08" x2="7.62" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="7.62" y1="-5.08" x2="-7.62" y2="-5.08" width="0.254" layer="94"/>
+<wire x1="-7.62" y1="-5.08" x2="-7.62" y2="5.08" width="0.254" layer="94"/>
+<text x="0" y="-7.62" size="1.778" layer="95">&gt;NAME</text>
+<text x="0" y="7.62" size="1.778" layer="96" rot="MR180">&gt;VALUE</text>
 </symbol>
 </symbols>
 <devicesets>
@@ -1141,6 +1169,27 @@
 <connect gate="G$1" pin="7" pad="7"/>
 <connect gate="G$1" pin="8" pad="8"/>
 <connect gate="G$1" pin="9" pad="9"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="MP45DT02" prefix="U">
+<description>Digital MEMS microphone</description>
+<gates>
+<gate name="G$1" symbol="MP45DT02" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="ST_HLGA6">
+<connects>
+<connect gate="G$1" pin="CLK" pad="4"/>
+<connect gate="G$1" pin="DOUT" pad="5"/>
+<connect gate="G$1" pin="GND@1" pad="1"/>
+<connect gate="G$1" pin="GND@2" pad="3"/>
+<connect gate="G$1" pin="LR" pad="2"/>
+<connect gate="G$1" pin="VDD" pad="6"/>
 </connects>
 <technologies>
 <technology name=""/>
@@ -8132,6 +8181,8 @@ Source: www.kingbright.com</description>
 <part name="R14" library="resistor" deviceset="R-US_" device="R0402" value="22k"/>
 <part name="R15" library="resistor" deviceset="R-US_" device="R0402" value="22k"/>
 <part name="J7" library="xnemo" deviceset="HEADER_2X8" device=""/>
+<part name="U3" library="xnemo" deviceset="MP45DT02" device=""/>
+<part name="SB3" library="xnemo" deviceset="SOLDER_BRIDGE_2" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -8201,6 +8252,8 @@ Source: www.kingbright.com</description>
 <instance part="R14" gate="G$1" x="-10.16" y="-50.8" rot="R90"/>
 <instance part="R15" gate="G$1" x="0" y="-50.8" rot="R90"/>
 <instance part="J7" gate="G$1" x="-236.22" y="-119.38"/>
+<instance part="U3" gate="G$1" x="-22.86" y="-17.78"/>
+<instance part="SB3" gate="G$1" x="-55.88" y="-25.4" rot="R90"/>
 </instances>
 <busses>
 </busses>
@@ -8412,6 +8465,15 @@ Source: www.kingbright.com</description>
 <pinref part="J7" gate="G$1" pin="3"/>
 <wire x1="-241.3" y1="-111.76" x2="-254" y2="-111.76" width="0.1524" layer="91"/>
 <label x="-241.3" y="-111.76" size="1.778" layer="95" rot="MR0"/>
+</segment>
+<segment>
+<pinref part="U3" gate="G$1" pin="VDD"/>
+<wire x1="-12.7" y1="-15.24" x2="5.08" y2="-15.24" width="0.1524" layer="91"/>
+<label x="-12.7" y="-15.24" size="1.778" layer="95"/>
+<pinref part="SB3" gate="G$1" pin="P$1"/>
+<wire x1="-58.42" y1="-30.48" x2="-58.42" y2="-33.02" width="0.1524" layer="91"/>
+<wire x1="-58.42" y1="-33.02" x2="5.08" y2="-33.02" width="0.1524" layer="91"/>
+<wire x1="5.08" y1="-33.02" x2="5.08" y2="-15.24" width="0.1524" layer="91"/>
 </segment>
 </net>
 <net name="GND" class="0">
@@ -8712,6 +8774,18 @@ Source: www.kingbright.com</description>
 <wire x1="15.24" y1="-119.38" x2="15.24" y2="-124.46" width="0.1524" layer="91"/>
 <junction x="15.24" y="-124.46"/>
 </segment>
+<segment>
+<pinref part="U3" gate="G$1" pin="GND@2"/>
+<wire x1="-33.02" y1="-20.32" x2="-45.72" y2="-20.32" width="0.1524" layer="91"/>
+<label x="-33.02" y="-20.32" size="1.778" layer="95" rot="MR0"/>
+</segment>
+<segment>
+<pinref part="U3" gate="G$1" pin="GND@1"/>
+<label x="-33.02" y="-15.24" size="1.778" layer="95" rot="MR0"/>
+<pinref part="SB3" gate="G$1" pin="P$2"/>
+<wire x1="-33.02" y1="-15.24" x2="-58.42" y2="-15.24" width="0.1524" layer="91"/>
+<wire x1="-58.42" y1="-15.24" x2="-58.42" y2="-20.32" width="0.1524" layer="91"/>
+</segment>
 </net>
 <net name="GYR_RES1" class="0">
 <segment>
@@ -9003,18 +9077,28 @@ Source: www.kingbright.com</description>
 <label x="-152.4" y="-30.48" size="1.778" layer="95" rot="R90"/>
 </segment>
 </net>
-<net name="N$3" class="0">
+<net name="USART1_RX" class="0">
 <segment>
 <pinref part="U4" gate="G$1" pin="PA10"/>
 <wire x1="-81.28" y1="-58.42" x2="-68.58" y2="-58.42" width="0.1524" layer="91"/>
 <label x="-81.28" y="-58.42" size="1.778" layer="95"/>
 </segment>
+<segment>
+<pinref part="U3" gate="G$1" pin="DOUT"/>
+<wire x1="-12.7" y1="-17.78" x2="0" y2="-17.78" width="0.1524" layer="91"/>
+<label x="-12.7" y="-17.78" size="1.778" layer="95"/>
+</segment>
 </net>
-<net name="N$5" class="0">
+<net name="USART1_CK" class="0">
 <segment>
 <pinref part="U4" gate="G$1" pin="PA8"/>
 <wire x1="-81.28" y1="-63.5" x2="-68.58" y2="-63.5" width="0.1524" layer="91"/>
 <label x="-81.28" y="-63.5" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="U3" gate="G$1" pin="CLK"/>
+<wire x1="-12.7" y1="-20.32" x2="0" y2="-20.32" width="0.1524" layer="91"/>
+<label x="-12.7" y="-20.32" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="DCMI_D0_MCK" class="0">
@@ -9896,6 +9980,16 @@ Source: www.kingbright.com</description>
 <pinref part="J7" gate="G$1" pin="5"/>
 <wire x1="-241.3" y1="-114.3" x2="-254" y2="-114.3" width="0.1524" layer="91"/>
 <label x="-241.3" y="-114.3" size="1.778" layer="95" rot="MR0"/>
+</segment>
+</net>
+<net name="MIC_LR" class="0">
+<segment>
+<pinref part="U3" gate="G$1" pin="LR"/>
+<wire x1="-33.02" y1="-17.78" x2="-48.26" y2="-17.78" width="0.1524" layer="91"/>
+<label x="-33.02" y="-17.78" size="1.778" layer="95" rot="MR0"/>
+<wire x1="-48.26" y1="-17.78" x2="-48.26" y2="-25.4" width="0.1524" layer="91"/>
+<pinref part="SB3" gate="G$1" pin="P$3"/>
+<wire x1="-48.26" y1="-25.4" x2="-50.8" y2="-25.4" width="0.1524" layer="91"/>
 </segment>
 </net>
 </nets>
