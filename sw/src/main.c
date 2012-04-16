@@ -1,6 +1,7 @@
 #include "stm32f4xx_conf.h"
 
 #include "tick.h"
+#include "l3gd20.h"
 
 //! @defgroup util Utilities
 

@@ -4,7 +4,7 @@
 #define HAS_GYRO_1 1
 #define HAS_GYRO_2 1
 
-#define GYRO_USE_DMA 1
+#define GYRO_USE_DMA 0
 
 typedef struct {
 	float x;

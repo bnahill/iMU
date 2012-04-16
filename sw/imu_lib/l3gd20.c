@@ -25,8 +25,11 @@
 #define GYRO_SPI_CLK_CMD  RCC_APB2PeriphClockCmd
 #define GYRO_SPI_CLK      RCC_APB2Periph_SPI1
 #define GYRO_SPI_AF       GPIO_AF_SPI1
+#define GYRO_SPI_RX_ISR   SPI1_IRQHandler
+#define GYRO_SPI_RX_IRQ   SPI1_IRQn
 
 #define GYRO_DMA            DMA2
+#define GYRO_DMA_CLK        RCC_AHB1Periph_DMA2
 #define GYRO_DMA_CHANNEL    DMA_Channel_3
 #define GYRO_DMA_RX_STREAM  DMA2_Stream0
 #define GYRO_DMA_TX_STREAM  DMA2_Stream2
@@ -72,7 +75,10 @@ euclidean3_t gyro2_result;
 #endif
 
 static uint8_t l3gd20_read_register(uint8_t addr);
-static void l3gd20_transfer_dma(void *restrict r_buff, void *restrict w_buff, uint16_t len);
+static void l3gd20_transfer(uint8_t *restrict r_buff, uint8_t *restrict w_buff, uint16_t len);
+static volatile int is_done;
+
+static uint8_t *read_ptr;
 
 void l3gd20_init(void){
 	SPI_InitTypeDef  SPI_InitStructure;
@@ -80,6 +86,7 @@ void l3gd20_init(void){
 	NVIC_InitTypeDef NVIC_InitStructure;
 #if GYRO_USE_DMA
 	DMA_InitTypeDef  DMA_InitStructure;
+	RCC_AHB1PeriphClockCmd(GYRO_DMA_CLK, ENABLE);
 #endif
 
 	GYRO_SPI_CLK_CMD(GYRO_SPI_CLK, ENABLE);
@@ -88,14 +95,15 @@ void l3gd20_init(void){
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 #if HAS_GYRO_1
+	GYRO_1_CS_GPIO->ODR |= GYRO_1_CS_PIN;
 	GPIO_InitStructure.GPIO_Pin = GYRO_1_CS_PIN;
 	GPIO_Init(GYRO_1_CS_GPIO, &GPIO_InitStructure);
 #endif
 #if HAS_GYRO_2
+	GYRO_2_CS_GPIO->ODR |= GYRO_2_CS_PIN;
 	GPIO_InitStructure.GPIO_Pin = GYRO_2_CS_PIN;
 	GPIO_Init(GYRO_2_CS_GPIO, &GPIO_InitStructure);
 #endif
-
 
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
 	// SCK
@@ -103,7 +111,7 @@ void l3gd20_init(void){
 	GPIO_InitStructure.GPIO_Pin = GYRO_SCK_PIN;
 	GPIO_Init(GYRO_SCK_GPIO, &GPIO_InitStructure);
 	// MISO
-	GPIO_PinAFConfig(GYRO_MISO_GPIO, GYRO_SCK_PINSRC, GYRO_SPI_AF);
+	GPIO_PinAFConfig(GYRO_MISO_GPIO, GYRO_MISO_PINSRC, GYRO_SPI_AF);
 	GPIO_InitStructure.GPIO_Pin = GYRO_MISO_PIN;
 	GPIO_Init(GYRO_MISO_GPIO, &GPIO_InitStructure);
 	// MOSI
@@ -117,6 +125,7 @@ void l3gd20_init(void){
 
 	DMA_InitStructure.DMA_Channel = GYRO_DMA_CHANNEL;
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t) &GYRO_SPI->DR;
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
 	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
 	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
@@ -145,6 +154,9 @@ void l3gd20_init(void){
 	SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;
 	SPI_InitStructure.SPI_CRCPolynomial = 7;
 
+	SPI_Init(GYRO_SPI, &SPI_InitStructure);
+	SPI_Cmd(GYRO_SPI, ENABLE);
+
 #if GYRO_USE_DMA
 	SPI_DMACmd(GYRO_SPI, SPI_DMAReq_Rx | SPI_DMAReq_Tx, ENABLE);
 
@@ -156,8 +168,15 @@ void l3gd20_init(void){
 
 	// Only interrupt on RX complete for entire transaction
 	DMA_ITConfig(GYRO_DMA_RX_STREAM, DMA_IT_TC, ENABLE);
+#else
+	SPI_ITConfig(GYRO_SPI, SPI_IT_RXNE, ENABLE);
+	
+	NVIC_InitStructure.NVIC_IRQChannel = GYRO_SPI_RX_IRQ;
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+	NVIC_Init(&NVIC_InitStructure);
 #endif
-	SPI_Init(GYRO_SPI, &SPI_InitStructure);
 
 #if HAS_GYRO_1
 	GYRO_1_CS_GPIO->ODR &= ~GYRO_1_CS_PIN;
@@ -177,25 +196,43 @@ void l3gd20_init(void){
 static uint8_t l3gd20_read_register(uint8_t addr){
 	uint8_t read_buff[2], write_buff[2];
 	write_buff[0] = addr | 0x80;
-	l3gd20_transfer_dma(read_buff, write_buff, 2);
+	l3gd20_transfer(read_buff, write_buff, 2);
+	return read_buff[1];
 }
 
 void l3gd20_read(void){
 }
 
+
+static void l3gd20_transfer(uint8_t *restrict r_buff, uint8_t *restrict w_buff, uint16_t len){
 #if GYRO_USE_DMA
-static void l3gd20_transfer_dma(void *restrict r_buff, void *restrict w_buff, uint16_t len){
+	is_done = 0;
 	GYRO_DMA_RX_STREAM->M0AR = (uint32_t)r_buff;
-	GYRO_DMA_TX_STREAM->M0AR = (uint32_t)r_buff;
+	GYRO_DMA_TX_STREAM->M0AR = (uint32_t)w_buff;
 	GYRO_DMA_RX_STREAM->NDTR = len;
 	GYRO_DMA_TX_STREAM->NDTR = len;
 
 	DMA_Cmd(GYRO_DMA_RX_STREAM, ENABLE);
-}
+	DMA_Cmd(GYRO_DMA_TX_STREAM, ENABLE);
+	while(is_done == 0);
+#else
+	while(len--){
+		is_done = 0;
+		read_ptr = r_buff++;
+		GYRO_SPI->DR = *(w_buff++);
+		while(is_done == 0);
+	}
 #endif
+}
 
 void GYRO_DMA_RX_ISR(void){
 	if(DMA_GetITStatus(GYRO_DMA_RX_STREAM, GYRO_DMA_RX_TCIF)){
 	    DMA_ClearITPendingBit(GYRO_DMA_RX_STREAM, GYRO_DMA_RX_TCIF);
+	    is_done = 1;
 	}
+}
+
+void GYRO_SPI_RX_ISR(void){
+	is_done = 1;
+	*read_ptr = GYRO_SPI->DR;
 }

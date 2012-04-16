@@ -369,6 +369,7 @@ include_directories(
 add_library(imu_lib STATIC ${IMU_SOURCES})
 add_library(std_periph STATIC ${STM_SOURCES})
 add_library(cmsis_dsp STATIC ${CMSIS_DSP_SOURCES})
+target_link_libraries(imu_lib std_periph)
 add_executable(${OUTFILE} ${APP_SOURCES} ${SYSTEM_SOURCES})
 target_link_libraries(${OUTFILE} std_periph cmsis_dsp imu_lib)
 
