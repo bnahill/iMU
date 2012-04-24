@@ -379,7 +379,7 @@ add_custom_target(linker_script DEPENDS link.ld)
 add_dependencies(${OUTFILE} linker_script)
 
 # Warnings only for application code -- Optimizations only on ST/ARM code
-set_target_properties(${OUTFILE} PROPERTIES COMPILE_FLAGS "-W -O0")
+set_target_properties(${OUTFILE} PROPERTIES COMPILE_FLAGS "-W -O2")
 set_target_properties(std_periph PROPERTIES COMPILE_FLAGS "-w -O3")
 set_target_properties(cmsis_dsp PROPERTIES COMPILE_FLAGS "-w -O3")
 ##############################################################

@@ -21,7 +21,11 @@ int main(void){
 	GPIO_InitTypeDef GPIO_InitStructure;
 	
 	// GPIOD Periph clock enable
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD | RCC_AHB1Periph_GPIOC, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA |
+	                       RCC_AHB1Periph_GPIOB |
+	                       RCC_AHB1Periph_GPIOC |
+	                       RCC_AHB1Periph_GPIOD |
+	                       RCC_AHB1Periph_GPIOE, ENABLE);
 
 	// Configure LEDs in output pushpull mode
 	GPIO_InitStructure.GPIO_Pin = LED_PIN_ALL;
@@ -34,22 +38,13 @@ int main(void){
 	l3gd20_init();
 
 	// Configure SysTick for 400ms period	
-	if(!tick_start(400.0)){
+	if(!tick_start(10.0)){
 		while(1);
 	}
 	
 	while (1){
-		LED_SET(0);
 		tick_wait(1);
-		LED_SET(1);
-		tick_wait(1);
-		LED_SET(2);
-		tick_wait(1);
-
-		LED_CLR_ALL();
-
-		tick_wait(1);
-
+		l3gd20_read();
 	}
 }
 

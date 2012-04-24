@@ -4,12 +4,19 @@
 #include "stm32f4xx_conf.h"
 #include "sensor_config.h"
 
+typedef struct {
+	euclidean3_t        reading;
+	GPIO_TypeDef        *const cs_gpio;
+	uint16_t            const cs_pin_mask;
+	float               const dps_scale;
+} gyro_t;
+
 #if HAS_GYRO_1
-extern euclidean3_t gyro1_result;
+extern gyro_t gyro1;
 #endif
 
 #if HAS_GYRO_2
-extern euclidean3_t gyro2_result;
+extern gyro_t gyro2;
 #endif
 
 void l3gd20_init(void);
