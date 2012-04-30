@@ -3,8 +3,6 @@
 #include "l3gd20.h"
 #include "sensor_config.h"
 
-#define BIT(x) (1 << x)
-
 #define GYRO_1_CS_GPIO    GPIOC
 #define GYRO_1_CS_PIN     BIT(1)
 
@@ -101,11 +99,11 @@ static volatile int is_done;
 static uint8_t *read_ptr;
 
 extern inline void l3gd20_select(gyro_t *restrict gyro){
-	gyro->cs_gpio->ODR &= ~gyro->cs_pin_mask;
+	gyro->cs_gpio->BSRRH = gyro->cs_pin_mask;
 }
 
 extern inline void l3gd20_deselect(gyro_t *restrict gyro){
-	gyro->cs_gpio->ODR |= gyro->cs_pin_mask;
+	gyro->cs_gpio->BSRRL = gyro->cs_pin_mask;
 }
 
 extern inline void l3gd20_initialize_device(gyro_t *restrict gyro){
@@ -150,12 +148,12 @@ void l3gd20_init(void){
 	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_OUT;
 #if HAS_GYRO_1
-	GYRO_1_CS_GPIO->ODR |= GYRO_1_CS_PIN;
+	GYRO_1_CS_GPIO->BSRRL = GYRO_1_CS_PIN;
 	GPIO_InitStructure.GPIO_Pin = GYRO_1_CS_PIN;
 	GPIO_Init(GYRO_1_CS_GPIO, &GPIO_InitStructure);
 #endif
 #if HAS_GYRO_2
-	GYRO_2_CS_GPIO->ODR |= GYRO_2_CS_PIN;
+	GYRO_2_CS_GPIO->BSRRL = GYRO_2_CS_PIN;
 	GPIO_InitStructure.GPIO_Pin = GYRO_2_CS_PIN;
 	GPIO_Init(GYRO_2_CS_GPIO, &GPIO_InitStructure);
 #endif

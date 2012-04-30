@@ -2,6 +2,7 @@
 
 #include "tick.h"
 #include "l3gd20.h"
+#include "lsm303.h"
 
 //! @defgroup util Utilities
 
@@ -35,6 +36,7 @@ int main(void){
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_Init(LED_GPIO, &GPIO_InitStructure);
 	
+	lsm303_init();
 	l3gd20_init();
 
 	// Configure SysTick for 400ms period	
