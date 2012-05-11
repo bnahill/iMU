@@ -44,7 +44,7 @@ add_definitions(-DUSE_STDPERIPH_DRIVER -DSTM32F4XX -DHSE_VALUE=8000000 -DARM_MAT
 set(CMAKE_CXX_FLAGS "--std=c++0x -fno-rtti -fno-exceptions")
 # Use the new C11 standard
 set(CMAKE_C_FLAGS "--std=c1x")
-set(CMAKE_EXE_LINKER_FLAGS "-Tlink.ld -Wl,-Map=${TARGET}.map,--cref,--gc-sections -nostdlib ${MCFLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS "-Tlink.ld -flto  -Wl,-Map=${TARGET}.map,--cref,--gc-sections -nostdlib ${MCFLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
 
 set(STD_PERIPH_SRC_DIR ${STD_PERIPH_DIR}/src)
 
@@ -381,7 +381,7 @@ add_custom_target(linker_script DEPENDS link.ld)
 add_dependencies(${OUTFILE} linker_script)
 
 # Warnings only for application code -- Optimizations only on ST/ARM code
-set_target_properties(${OUTFILE} PROPERTIES COMPILE_FLAGS "-W -O2")
+set_target_properties(${OUTFILE} PROPERTIES COMPILE_FLAGS "-W -O0")
 set_target_properties(std_periph PROPERTIES COMPILE_FLAGS "-w -O3")
 set_target_properties(cmsis_dsp PROPERTIES COMPILE_FLAGS "-w -O3")
 ##############################################################

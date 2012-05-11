@@ -27,7 +27,7 @@ void lsm303_init(void){
 	buffer[0] = 0;
 
 #if HAS_MAGACC_1
-	i2c_init(magacc1.i2c, I2C_MODE_MASTER, 400000);
+	i2c_init(magacc1.i2c, I2C_MODE_MASTER, 100000);
 	done = 0;
 	i2c_write(magacc1.i2c, MAG_ADDR, 0x20, buffer, 1, &done);
 	while(!done);

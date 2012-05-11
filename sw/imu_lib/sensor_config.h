@@ -1,6 +1,8 @@
 #ifndef __SENSOR_CONFIG_H_
 #define __SENSOR_CONFIG_H_
 
+#include "toolchain.h"
+
 #ifndef BIT
 #define BIT(x) (1 << x)
 #endif
@@ -26,7 +28,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #define HAS_MAGACC_1 1
-#define HAS_MAGACC_2 0
+#define HAS_MAGACC_2 1
 
 //////////////////////////////////////////////////////////////////////////////
 // 

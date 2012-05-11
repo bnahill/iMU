@@ -117,28 +117,45 @@ int i2c_init(i2c_t *i2c, i2c_mode_t mode, uint32_t speed){
 		__enable_irq();
 		return 1;
 	}
-	
+
+	GPIO_StructInit(&gpio_init_s);
+	I2C_StructInit(&i2c_init_s);
+
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
+
 	// All I2C peripherals are on APB1
 	RCC_APB1PeriphClockCmd(conf->clock, ENABLE);
-	I2C_DeInit(i2c->i2c);
+	RCC_APB1PeriphResetCmd(conf->clock, ENABLE);
+	RCC_APB1PeriphResetCmd(conf->clock, DISABLE);
 
 	////////////////////////////////////////////////////////////////////
 	// GPIO Config
 	////////////////////////////////////////////////////////////////////
-	
-	// Alternate functions
-	GPIO_PinAFConfig(conf->sda_gpio, conf->sda_pinsrc, conf->af);
-	GPIO_PinAFConfig(conf->scl_gpio, conf->scl_pinsrc, conf->af);
 
 	// Mode configuration
-	gpio_init_s.GPIO_Mode = GPIO_Mode_AF;
-	gpio_init_s.GPIO_Speed = GPIO_Speed_100MHz;
-	gpio_init_s.GPIO_OType = GPIO_OType_OD;
-	
+	gpio_init_s.GPIO_Mode = GPIO_Mode_OUT;
+	gpio_init_s.GPIO_Speed = GPIO_Speed_50MHz;
+	gpio_init_s.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	gpio_init_s.GPIO_OType = GPIO_OType_PP;
+
+	conf->scl_gpio->BSRRL = conf->scl_pin;
+	conf->sda_gpio->BSRRH = conf->sda_pin;
+	conf->sda_gpio->BSRRL = conf->sda_pin;
+	conf->scl_gpio->BSRRH = conf->scl_pin;
+	GPIOB->BSRRL = BIT(8);
+	GPIOB->BSRRL = BIT(9);
+	GPIOB->BSRRH = BIT(9);
+	GPIOB->BSRRH = BIT(8);
+	while(1);
+
 	gpio_init_s.GPIO_Pin = conf->sda_pin;
 	GPIO_Init(conf->sda_gpio, &gpio_init_s);
 	gpio_init_s.GPIO_Pin = conf->scl_pin;
 	GPIO_Init(conf->scl_gpio, &gpio_init_s);
+
+	// Alternate functions
+	GPIO_PinAFConfig(conf->sda_gpio, conf->sda_pinsrc, conf->af);
+	GPIO_PinAFConfig(conf->scl_gpio, conf->scl_pinsrc, conf->af);
 
 	////////////////////////////////////////////////////////////////////
 	// I2C Config
@@ -146,7 +163,8 @@ int i2c_init(i2c_t *i2c, i2c_mode_t mode, uint32_t speed){
 
 	i2c_init_s.I2C_Mode = I2C_Mode_I2C;
 	i2c_init_s.I2C_DutyCycle = I2C_DutyCycle_2;
-	i2c_init_s.I2C_ClockSpeed = speed;
+	i2c_init_s.I2C_ClockSpeed = 100000;
+	//i2c_init_s.I2C_OwnAddress1 = 0xA0;
 	i2c_init_s.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 	i2c_init_s.I2C_Ack = I2C_Ack_Enable;
 
@@ -155,7 +173,7 @@ int i2c_init(i2c_t *i2c, i2c_mode_t mode, uint32_t speed){
 	////////////////////////////////////////////////////////////////////
 	// Interrupt Config
 	////////////////////////////////////////////////////////////////////
-	
+
 	nvic_init_s.NVIC_IRQChannel = conf->irq_er;
 	nvic_init_s.NVIC_IRQChannelSubPriority = 2;
 	nvic_init_s.NVIC_IRQChannelPreemptionPriority = 2;
@@ -163,8 +181,8 @@ int i2c_init(i2c_t *i2c, i2c_mode_t mode, uint32_t speed){
 	NVIC_Init(&nvic_init_s);
 
 	nvic_init_s.NVIC_IRQChannel = conf->irq_ev;
-	nvic_init_s.NVIC_IRQChannelSubPriority = 2;
-	nvic_init_s.NVIC_IRQChannelPreemptionPriority = 2;
+	nvic_init_s.NVIC_IRQChannelSubPriority = 3;
+	nvic_init_s.NVIC_IRQChannelPreemptionPriority = 3;
 	nvic_init_s.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&nvic_init_s);
 
@@ -225,7 +243,7 @@ extern int inline i2c_check_evt(uint32_t event1, uint32_t event2){
 	return 0;
 }
 
-extern void inline i2c_isr_evt(i2c_t *restrict const i2c){
+extern void inline i2c_isr_evt(i2c_t *RESTRICT const i2c){
 	uint32_t const event = I2C_GetLastEvent(i2c->i2c);
 	switch(i2c->op){
 	case I2C_OP_WRITE:
@@ -256,7 +274,7 @@ extern void inline i2c_isr_evt(i2c_t *restrict const i2c){
 	}
 }
 
-extern void inline i2c_isr_err(i2c_t *restrict i2c){
+extern void inline i2c_isr_err(i2c_t *RESTRICT i2c){
 
 }
 

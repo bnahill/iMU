@@ -36,13 +36,13 @@ int main(void){
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_Init(LED_GPIO, &GPIO_InitStructure);
 	
-	lsm303_init();
-	l3gd20_init();
-
 	// Configure SysTick for 400ms period	
 	if(!tick_start(10.0)){
 		while(1);
 	}
+	
+	lsm303_init();
+	l3gd20_init();
 	
 	while (1){
 		tick_wait(1);
