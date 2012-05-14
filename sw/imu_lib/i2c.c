@@ -3,100 +3,79 @@
 
 #if USE_I2C1
 static const i2c_config_t i2c1_config = {
-	GPIO_AF_I2C1,
+	.af = GPIO_AF_I2C1,
 	// SDA
-	GPIOB,
-	BIT(9),
-	GPIO_PinSource9,
+	.sda_gpio = GPIOB,
+	.sda_pin = BIT(9),
+	.sda_pinsrc = GPIO_PinSource9,
 	// SCL
-	GPIOB,
-	BIT(8),
-	GPIO_PinSource8,
+	.scl_gpio = GPIOB,
+	.scl_pin = BIT(8),
+	.scl_pinsrc = GPIO_PinSource8,
 	// IRQs
-	I2C1_EV_IRQn,
-	I2C1_ER_IRQn,
+	.irq_ev = I2C1_EV_IRQn,
+	.irq_er = I2C1_ER_IRQn,
 	// Clock
-	RCC_APB1Periph_I2C1
+	.clock = RCC_APB1Periph_I2C1
 };
 
 i2c_t i2c1 = {
-	I2C1,
-	I2C_MODE_DISABLED,
-	I2C_OP_READ,
-	I2C_ST_IDLE,
-	0,
-	0,
-	(uint8_t *)0,
-	0,
-	(uint8_t *)0,
-	0,
-	&i2c1_config
+	.i2c = I2C1,
+	.mode = I2C_MODE_DISABLED,
+	.state = I2C_ST_IDLE,
+	.config = &i2c1_config
 };
 #endif
 
 #if USE_I2C2
 static const i2c_config_t i2c2_config = {
-	GPIO_AF_I2C2,
+	.af = GPIO_AF_I2C2,
 	// SDA
-	GPIOB,
-	BIT(11),
-	GPIO_PinSource9,
+	.sda_gpio = GPIOB,
+	.sda_pin = BIT(11),
+	.sda_pinsrc = GPIO_PinSource11,
 	// SCL
-	GPIOB,
-	BIT(10),
-	GPIO_PinSource8,
+	.scl_gpio = GPIOB,
+	.scl_pin = BIT(10),
+	.scl_pinsrc = GPIO_PinSource10,
 	// IRQs
-	I2C2_EV_IRQn,
-	I2C2_ER_IRQn,
+	.irq_ev = I2C2_EV_IRQn,
+	.irq_er = I2C2_ER_IRQn,
 	// Clock
-	RCC_APB1Periph_I2C2
+	.clock = RCC_APB1Periph_I2C2
 };
 
 i2c_t i2c2 = {
-	I2C2,
-	I2C_MODE_DISABLED,
-	I2C_OP_READ,
-	I2C_ST_IDLE,
-	0,
-	0,
-	(uint8_t *)0,
-	0,
-	(uint8_t *)0,
-	0,
-	&i2c2_config
+	.i2c = I2C2,
+	.mode = I2C_MODE_DISABLED,
+	.state = I2C_ST_IDLE,
+	.config = &i2c2_config
 };
 #endif
 
 #if USE_I2C3
 static const i2c_config_t i2c3_config = {
-	GPIO_AF_I2C3,
+	.af = GPIO_AF_I2C3,
 	// SDA
-	GPIOC,
-	BIT(9),
-	GPIO_PinSource9,
+	.sda_gpio = GPIOC,
+	.sda_pin = BIT(9),
+	.sda_pinsrc = GPIO_PinSource9,
 	// SCL
-	GPIOC,
-	BIT(8),
-	GPIO_PinSource8,
+	.scl_gpio = GPIOC,
+	.scl_pin = BIT(8),
+	.scl_pinsrc = GPIO_PinSource8,
 	// IRQs
-	I2C3_EV_IRQn,
-	I2C3_ER_IRQn,
+	.irq_ev = I2C3_EV_IRQn,
+	.irq_er = I2C3_ER_IRQn,
 	// Clock
-	RCC_APB1Periph_I2C3
+	.clock = RCC_APB1Periph_I2C3
 };
 
 i2c_t i2c3 = {
-	I2C3,
-	I2C_MODE_DISABLED,
-	I2C_OP_READ,
-	I2C_ST_IDLE,
-	0,
-	0,
-	(uint8_t *)0,
-	0,
-	(uint8_t *)0,
-	0,
-	&i2c3_config
+	.i2c = I2C3
+	.mode = I2C_MODE_DISABLED,
+	.state = I2C_ST_IDLE,
+	.config = &i2c3_config
 };
 #endif
 
@@ -120,8 +99,6 @@ int i2c_init(i2c_t *i2c, i2c_mode_t mode, uint32_t speed){
 
 	GPIO_StructInit(&gpio_init_s);
 	I2C_StructInit(&i2c_init_s);
-
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOB, ENABLE);
 
 	// All I2C peripherals are on APB1
 	RCC_APB1PeriphClockCmd(conf->clock, ENABLE);
@@ -226,13 +203,14 @@ void i2c_unlock(i2c_t *i2c){
 	i2c->lock = 0;
 }
 
-void i2c_write(i2c_t *i2c, uint8_t devaddr, uint8_t addr, uint8_t *buffer, uint8_t count, int8_t *flag){
+void i2c_write(i2c_t *i2c, uint8_t devaddr, uint8_t addr, uint8_t *buffer, uint8_t count){
 	i2c_spinlock(i2c);
 	i2c->op = I2C_OP_WRITE;
 	i2c->addr = addr;
 	i2c->devaddr = devaddr;
 	i2c->count = count;
 	i2c->state = I2C_ST_MASTER_REQ;
+	i2c->done = 0;
 	I2C_AcknowledgeConfig(i2c->i2c, ENABLE);
 	I2C_GenerateSTART(i2c->i2c, ENABLE);
 }
@@ -243,38 +221,129 @@ extern int inline i2c_check_evt(uint32_t event1, uint32_t event2){
 	return 0;
 }
 
-extern void inline i2c_isr_evt(i2c_t *RESTRICT const i2c){
+extern void inline i2c_read_isr_evt(i2c_t *RESTRICT const i2c){
 	uint32_t const event = I2C_GetLastEvent(i2c->i2c);
-	switch(i2c->op){
-	case I2C_OP_WRITE:
-		switch(i2c->state){
-		case I2C_ST_MASTER_REQ:
-			if(i2c_check_evt(event, I2C_EVENT_MASTER_MODE_SELECT)){
-				I2C_Send7bitAddress(i2c->i2c, i2c->devaddr, I2C_Direction_Transmitter);
-				i2c->state = I2C_ST_ADDRESSED;
+	switch(i2c->state){
+	case I2C_ST_MASTER_REQ:
+		if(event == I2C_EVENT_MASTER_MODE_SELECT){
+			I2C_AcknowledgeConfig(i2c->i2c, ENABLE);
+			I2C_Send7bitAddress(i2c->i2c, i2c->devaddr, I2C_Direction_Transmitter);
+			i2c->state = I2C_ST_ADDRESSED;
+		} else {
+			while(1);
+		}
+		break;
+	case I2C_ST_ADDRESSED:
+		if(event == I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED){
+			(void)i2c->i2c->SR1;
+			I2C_SendData(i2c->i2c, i2c->addr);
+			i2c->state = I2C_ST_ADDR_TXED;
+		}
+		break;
+	case I2C_ST_ADDR_TXED:
+		if(I2C_GetFlagStatus(i2c->i2c, I2C_FLAG_BTF) == SET){
+			I2C_GenerateSTART(i2c->i2c, ENABLE);
+			i2c->state = I2C_ST_REPEAT_START;
+		}
+		break;
+	case I2C_ST_REPEAT_START:
+		if(event == I2C_EVENT_MASTER_MODE_SELECT){
+			(void)i2c->i2c->SR1;
+			I2C_Send7bitAddress(i2c->i2c, i2c->devaddr, I2C_Direction_Receiver);
+			I2C_ITConfig(i2c->i2c, I2C_IT_BUF , ENABLE);
+			i2c->state = I2C_ST_REPEAT_ADDR;
+		}
+		break;
+	case I2C_ST_REPEAT_ADDR:
+		if(event == I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED){
+			if(i2c->count  == 1){
+				// NACK the next byte
+				I2C_AcknowledgeConfig(i2c->i2c, DISABLE);
 			}
-			break;
-		case I2C_ST_ADDRESSED:
-			if(i2c_check_evt(event, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)){
-				I2C_SendData(i2c->i2c, i2c->addr);
-				i2c->state = I2C_ST_ADDR_TXED;
-			}
-			break;
-		case I2C_ST_ADDR_TXED:
-			if(I2C_GetFlagStatus(i2c->i2c, I2C_FLAG_BTF)){
-				I2C_SendData(i2c->i2c, *(i2c->buffer));
-				if(--i2c->count == 0){
-					I2C_GenerateSTOP(i2c->i2c, ENABLE);
-				}
+			i2c->state = I2C_ST_READING;
+		}
+		break;
+	case I2C_ST_READING:
+		if(event == I2C_EVENT_MASTER_BYTE_RECEIVED){
+			*(i2c->buffer++) = I2C_ReceiveData(i2c->i2c);
+			if(--i2c->count == 1){
+				// NACK the next byte
+				I2C_AcknowledgeConfig(i2c->i2c, DISABLE);
+			} else if (i2c->count == 0){
+				i2c->state = I2C_ST_IDLE;
+				I2C_GenerateSTOP(i2c->i2c, ENABLE);
+				i2c->done = 1;
 			}
 		}
 		break;
+	}
+
+}
+
+extern void inline i2c_write_isr_evt(i2c_t *RESTRICT const i2c){
+	uint32_t const event = I2C_GetLastEvent(i2c->i2c);
+	switch(i2c->state){
+	case I2C_ST_MASTER_REQ:
+		if(i2c_check_evt(event, I2C_EVENT_MASTER_MODE_SELECT)){
+			I2C_Send7bitAddress(i2c->i2c, i2c->devaddr, I2C_Direction_Transmitter);
+			i2c->state = I2C_ST_ADDRESSED;
+		}
+		break;
+	case I2C_ST_ADDRESSED:
+		if(i2c_check_evt(event, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)){
+			I2C_SendData(i2c->i2c, i2c->addr);
+			i2c->state = I2C_ST_ADDR_TXED;
+		}
+		break;
+	case I2C_ST_ADDR_TXED:
+		if(I2C_GetFlagStatus(i2c->i2c, I2C_FLAG_BTF)){
+			I2C_SendData(i2c->i2c, *(i2c->buffer));
+			if(--i2c->count == 0){
+				I2C_GenerateSTOP(i2c->i2c, ENABLE);
+			}
+		}
+		break;
+	}
+}
+
+extern void inline i2c_read_isr_err(i2c_t *RESTRICT const i2c){
+	while(1);
+}
+
+extern void inline i2c_write_isr_err(i2c_t *RESTRICT const i2c){
+	if((i2c->i2c->SR1 & 0xFF00) != 0){
+		i2c->i2c->SR1 &= 0xFF00;
+	} else {
+		while(1);
+	}
+}
+	
+extern void inline i2c_isr_evt(i2c_t *RESTRICT const i2c){
+	switch(i2c->op){
+	case I2C_OP_WRITE:
+		i2c_write_isr_evt(i2c);
+		break;
 	case I2C_OP_READ:
+		i2c_read_isr_evt(i2c);
+		break;
+	default:
+		while(1);
 		break;
 	}
 }
 
 extern void inline i2c_isr_err(i2c_t *RESTRICT i2c){
+	switch(i2c->op){
+	case I2C_OP_WRITE:
+		i2c_write_isr_err(i2c);
+		break;
+	case I2C_OP_READ:
+		i2c_read_isr_err(i2c);
+		break;
+	default:
+		while(1);
+		break;
+	}
 
 }
 
