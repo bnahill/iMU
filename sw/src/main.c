@@ -47,6 +47,7 @@ int main(void){
 	while (1){
 		tick_wait(1);
 		l3gd20_read();
+		lsm303_read();
 	}
 }
 

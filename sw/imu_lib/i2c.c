@@ -222,18 +222,71 @@ void i2c_unlock(i2c_t *i2c){
 	i2c->lock = 0;
 }
 
+/*!
+ @brief Begin running this transfer, skipping all checks
+ @param i2c The I2C device
+ @param xfer The transfer to start
+
+ This is intended to be used internally to start each transfer
+ */
+extern void inline i2c_run_xfer(i2c_t *i2c, i2c_transfer_t *xfer){
+	i2c->xfer = xfer;
+	
+	i2c->state = I2C_ST_MASTER_REQ;
+	while(i2c->i2c->SR2 & I2C_SR2_BUSY);
+
+	I2C_AcknowledgeConfig(i2c->i2c, ENABLE);
+	I2C_GenerateSTART(i2c->i2c, ENABLE);
+}
+
+void i2c_transfer(i2c_t *i2c, i2c_transfer_t *xfer){
+	i2c_transfer_t *old_xfer;
+	// Clear the 'done' flag for this chain of transfers
+	for(old_xfer = xfer; old_xfer != NULL; old_xfer = old_xfer->next){
+		old_xfer->done = 0;
+	}
+
+	// Disable interrupts to modify the I2C transfer list
+	__disable_irq();
+	old_xfer = i2c->xfer;
+	if(old_xfer != NULL){
+		for(;old_xfer->next != NULL; old_xfer = old_xfer->next);
+		old_xfer->next = xfer;
+	} else {
+		i2c_run_xfer(i2c, xfer);	
+	}
+	__enable_irq();
+}
+
 void i2c_write_byte(i2c_t *i2c, uint8_t devaddr, uint8_t addr, uint8_t value){
-	i2c_write(i2c, devaddr, addr, &value, 1);
-	while(!i2c->done);
+	i2c_transfer_t xfer = {
+		.op = I2C_OP_WRITE,
+		.devaddr = devaddr,
+		.addr = addr,
+		.buffer = &value,
+		.count = 1,
+		.next = NULL
+	};
+	i2c_transfer(i2c, &xfer);
+	while(!xfer.done);
 }
 
 uint8_t i2c_read_byte(i2c_t *i2c, uint8_t devaddr, uint8_t addr){
 	uint8_t result;
-	i2c_read(i2c, devaddr, addr, &result, 1);
-	while(!i2c->done);
+	i2c_transfer_t xfer = {
+		.op = I2C_OP_READ,
+		.devaddr = devaddr,
+		.addr = addr,
+		.buffer = &result,
+		.count = 1,
+		.next = NULL
+	};
+	i2c_transfer(i2c, &xfer);
+	while(!xfer.done);
 	return result;
 }
 
+/*
 void i2c_write(i2c_t *i2c, uint8_t devaddr, uint8_t addr, uint8_t *buffer, uint8_t count){
 	i2c_spinlock(i2c);
 	i2c->op = I2C_OP_WRITE;
@@ -265,6 +318,7 @@ void i2c_read(i2c_t *i2c, uint8_t devaddr, uint8_t addr, uint8_t *buffer, uint8_
 	I2C_AcknowledgeConfig(i2c->i2c, ENABLE);
 	I2C_GenerateSTART(i2c->i2c, ENABLE);
 }
+*/
 
 extern int inline i2c_check_evt(uint32_t event1, uint32_t event2){
 	if((event1 & event2) == event2)
@@ -278,7 +332,7 @@ extern void inline i2c_read_isr_evt(i2c_t *RESTRICT const i2c){
 	case I2C_ST_MASTER_REQ:
 		if(event == I2C_EVENT_MASTER_MODE_SELECT){
 			I2C_AcknowledgeConfig(i2c->i2c, ENABLE);
-			I2C_Send7bitAddress(i2c->i2c, i2c->devaddr, I2C_Direction_Transmitter);
+			I2C_Send7bitAddress(i2c->i2c, i2c->xfer->devaddr, I2C_Direction_Transmitter);
 			i2c->state = I2C_ST_ADDRESSED;
 		} else {
 			while(1);
@@ -287,7 +341,7 @@ extern void inline i2c_read_isr_evt(i2c_t *RESTRICT const i2c){
 	case I2C_ST_ADDRESSED:
 		if(event == I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED){
 			(void)i2c->i2c->SR1;
-			I2C_SendData(i2c->i2c, i2c->addr);
+			I2C_SendData(i2c->i2c, i2c->xfer->addr);
 			i2c->state = I2C_ST_ADDR_TXED;
 		}
 		break;
@@ -300,14 +354,14 @@ extern void inline i2c_read_isr_evt(i2c_t *RESTRICT const i2c){
 	case I2C_ST_REPEAT_START:
 		if(event == I2C_EVENT_MASTER_MODE_SELECT){
 			(void)i2c->i2c->SR1;
-			I2C_Send7bitAddress(i2c->i2c, i2c->devaddr, I2C_Direction_Receiver);
+			I2C_Send7bitAddress(i2c->i2c, i2c->xfer->devaddr, I2C_Direction_Receiver);
 			I2C_ITConfig(i2c->i2c, I2C_IT_BUF , ENABLE);
 			i2c->state = I2C_ST_REPEAT_ADDR;
 		}
 		break;
 	case I2C_ST_REPEAT_ADDR:
 		if(event == I2C_EVENT_MASTER_RECEIVER_MODE_SELECTED){
-			if(i2c->count  == 1){
+			if(i2c->xfer->count  == 1){
 				// NACK the next byte
 				I2C_AcknowledgeConfig(i2c->i2c, DISABLE);
 			}
@@ -316,14 +370,19 @@ extern void inline i2c_read_isr_evt(i2c_t *RESTRICT const i2c){
 		break;
 	case I2C_ST_READING:
 		if(event == I2C_EVENT_MASTER_BYTE_RECEIVED){
-			*(i2c->buffer++) = I2C_ReceiveData(i2c->i2c);
-			if(--i2c->count == 1){
+			*(i2c->xfer->buffer++) = I2C_ReceiveData(i2c->i2c);
+			if(--i2c->xfer->count == 1){
 				// NACK the next byte
 				I2C_AcknowledgeConfig(i2c->i2c, DISABLE);
-			} else if (i2c->count == 0){
+			} else if (i2c->xfer->count == 0){
 				i2c->state = I2C_ST_IDLE;
 				I2C_GenerateSTOP(i2c->i2c, ENABLE);
-				i2c->done = 1;
+				i2c->xfer->done = 1;
+				if(i2c->xfer->next){
+					i2c_run_xfer(i2c, i2c->xfer->next);
+				} else {
+					i2c->xfer = NULL;
+				}
 			}
 		}
 		break;
@@ -336,29 +395,33 @@ extern void inline i2c_write_isr_evt(i2c_t *RESTRICT const i2c){
 	switch(i2c->state){
 	case I2C_ST_MASTER_REQ:
 		if(i2c_check_evt(event, I2C_EVENT_MASTER_MODE_SELECT)){
-			I2C_Send7bitAddress(i2c->i2c, i2c->devaddr, I2C_Direction_Transmitter);
+			I2C_Send7bitAddress(i2c->i2c, i2c->xfer->devaddr, I2C_Direction_Transmitter);
 			i2c->state = I2C_ST_ADDRESSED;
 		}
 		break;
 	case I2C_ST_ADDRESSED:
 		if(i2c_check_evt(event, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)){
-			I2C_SendData(i2c->i2c, i2c->addr);
+			I2C_SendData(i2c->i2c, i2c->xfer->addr);
 			i2c->state = I2C_ST_WRITING;
 		}
 		break;
 	case I2C_ST_WRITING:
 		if(I2C_GetFlagStatus(i2c->i2c, I2C_FLAG_BTF)){
-			I2C_SendData(i2c->i2c, *(i2c->buffer));
-			if(--i2c->count == 0){
+			I2C_SendData(i2c->i2c, *(i2c->xfer->buffer++));
+			if(--i2c->xfer->count == 0){
 				I2C_GenerateSTOP(i2c->i2c, ENABLE);
 				i2c->state = I2C_ST_CLOSING_WRITE;
 			}
 		}
 		break;
 	case I2C_ST_CLOSING_WRITE:
-		i2c->done = 1;
-		i2c_unlock(i2c);
+		i2c->xfer->done = 1;
 		i2c->state = I2C_ST_IDLE;
+		if(i2c->xfer->next){
+			i2c_run_xfer(i2c, i2c->xfer->next);
+		} else {
+			i2c->xfer = NULL;
+		}
 		break;	
 	}
 }
@@ -381,7 +444,7 @@ extern void inline i2c_write_isr_err(i2c_t *RESTRICT const i2c){
 }
 	
 extern void inline i2c_isr_evt(i2c_t *RESTRICT const i2c){
-	switch(i2c->op){
+	switch(i2c->xfer->op){
 	case I2C_OP_WRITE:
 		i2c_write_isr_evt(i2c);
 		break;
@@ -395,7 +458,7 @@ extern void inline i2c_isr_evt(i2c_t *RESTRICT const i2c){
 }
 
 extern void inline i2c_isr_err(i2c_t *RESTRICT i2c){
-	switch(i2c->op){
+	switch(i2c->xfer->op){
 	case I2C_OP_WRITE:
 		i2c_write_isr_err(i2c);
 		break;

@@ -27,6 +27,21 @@ typedef enum {
 	I2C_ST_CLOSING_WRITE
 } i2c_state_t;
 
+typedef struct _i2c_transfer {
+	i2c_op_t op;
+	//! The I2C address of the slave
+	uint8_t devaddr;
+	//! The data address to read or write
+	uint8_t addr;
+	//! The buffer address
+	uint8_t *buffer;
+	//! The number of bytes to read or write
+	uint8_t count;
+	//! A flag to indicate completion
+	uint8_t done;
+	struct _i2c_transfer *next;
+} i2c_transfer_t;
+
 /*!
  @brief A set of hardware-related constants for each I2C device
  */
@@ -51,20 +66,10 @@ typedef struct {
 	I2C_TypeDef *const i2c;
 	//! The mode
 	i2c_mode_t mode;
-	//! The current operation
-	i2c_op_t op;
 	//! The current state
 	i2c_state_t state;
-	//! The I2C address of the slave
-	uint8_t devaddr;
-	//! The data address to read or write
-	uint8_t addr;
-	//! The buffer address
-	uint8_t *buffer;
-	//! The number of bytes to read or write
-	uint8_t count;
-	//! A flag to indicate completion
-	uint8_t done;
+	//! The current transfer
+	i2c_transfer_t *xfer;
 	//! A lock for mutual exclusion
 	uint32_t lock;
 	//! A pointer to the hardware configuration
@@ -95,25 +100,14 @@ extern i2c_t i2c3;
  */
 int i2c_init(i2c_t *i2c, i2c_mode_t mode, uint32_t speed);
 
-/*!
- @brief Write some bytes to a device over I2C
- @param i2c The I2C device to use
- @param devaddr The address of the slave
- @param addr The address to write to
- @param buffer The start address of the buffer to write
- @param count the number of bytes to write
-
- Perform a write operation to an I2C slave using the common I2C memory
- interface format. To indicate completion, the caller should specify a
-
- */
-void i2c_write(i2c_t *i2c, uint8_t devaddr, uint8_t addr, uint8_t *buffer, uint8_t count);
-
 void i2c_write_byte(i2c_t *i2c, uint8_t devaddr, uint8_t addr, uint8_t value);
 
-void i2c_read(i2c_t *i2c, uint8_t devaddr, uint8_t addr, uint8_t *buffer, uint8_t count);
-
 uint8_t i2c_read_byte(i2c_t *i2c, uint8_t devaddr, uint8_t addr);
+
+/*!
+ @brief Start or queue a transfer
+ */
+void i2c_transfer(i2c_t *i2c, i2c_transfer_t *xfer);
 
 #endif
 

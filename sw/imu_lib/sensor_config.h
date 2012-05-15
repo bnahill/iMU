@@ -3,9 +3,13 @@
 
 #include "toolchain.h"
 
-//#ifndef BIT
+#ifndef BIT
 #define BIT(x) (1 << x)
-//#endif
+#endif
+
+#ifndef NULL
+#define NULL ((void *) 0)
+#endif
 
 
 //////////////////////////////////////////////////////////////////////////////
