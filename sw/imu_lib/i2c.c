@@ -102,6 +102,8 @@ int i2c_init(i2c_t *i2c, i2c_mode_t mode, uint32_t speed){
 
 	// All I2C peripherals are on APB1
 	RCC_APB1PeriphClockCmd(conf->clock, ENABLE);
+	
+	// Reset
 	RCC_APB1PeriphResetCmd(conf->clock, ENABLE);
 	RCC_APB1PeriphResetCmd(conf->clock, DISABLE);
 
@@ -109,30 +111,47 @@ int i2c_init(i2c_t *i2c, i2c_mode_t mode, uint32_t speed){
 	// GPIO Config
 	////////////////////////////////////////////////////////////////////
 
+	// Set alternate functions to use
+	GPIO_PinAFConfig(conf->sda_gpio, conf->sda_pinsrc, conf->af);
+	GPIO_PinAFConfig(conf->scl_gpio, conf->scl_pinsrc, conf->af);
+/*
 	// Mode configuration
-	gpio_init_s.GPIO_Mode = GPIO_Mode_OUT;
+	gpio_init_s.GPIO_Mode = GPIO_Mode_IN;
 	gpio_init_s.GPIO_Speed = GPIO_Speed_50MHz;
 	gpio_init_s.GPIO_PuPd = GPIO_PuPd_NOPULL;
-	gpio_init_s.GPIO_OType = GPIO_OType_PP;
-
-	conf->scl_gpio->BSRRL = conf->scl_pin;
-	conf->sda_gpio->BSRRH = conf->sda_pin;
-	conf->sda_gpio->BSRRL = conf->sda_pin;
-	conf->scl_gpio->BSRRH = conf->scl_pin;
-	GPIOB->BSRRL = BIT(8);
-	GPIOB->BSRRL = BIT(9);
-	GPIOB->BSRRH = BIT(9);
-	GPIOB->BSRRH = BIT(8);
-	while(1);
+	gpio_init_s.GPIO_OType = GPIO_OType_OD;
 
 	gpio_init_s.GPIO_Pin = conf->sda_pin;
 	GPIO_Init(conf->sda_gpio, &gpio_init_s);
 	gpio_init_s.GPIO_Pin = conf->scl_pin;
 	GPIO_Init(conf->scl_gpio, &gpio_init_s);
+*/
 
-	// Alternate functions
-	GPIO_PinAFConfig(conf->sda_gpio, conf->sda_pinsrc, conf->af);
-	GPIO_PinAFConfig(conf->scl_gpio, conf->scl_pinsrc, conf->af);
+	// Mode configuration
+	gpio_init_s.GPIO_Mode = GPIO_Mode_AF;
+	gpio_init_s.GPIO_Speed = GPIO_Speed_50MHz;
+	gpio_init_s.GPIO_PuPd = GPIO_PuPd_UP;
+	gpio_init_s.GPIO_OType = GPIO_OType_OD;
+
+	// For some reason the order here matters and it really shouldn't
+	gpio_init_s.GPIO_Pin = conf->scl_pin;
+	GPIO_Init(conf->scl_gpio, &gpio_init_s);
+	gpio_init_s.GPIO_Pin = conf->sda_pin;
+	GPIO_Init(conf->sda_gpio, &gpio_init_s);
+
+
+/*
+	while(1){
+		conf->scl_gpio->BSRRL = conf->scl_pin;
+		conf->sda_gpio->BSRRH = conf->sda_pin;
+		conf->sda_gpio->BSRRL = conf->sda_pin;
+		conf->scl_gpio->BSRRH = conf->scl_pin;
+		GPIOB->BSRRL = BIT(8);
+		GPIOB->BSRRL = BIT(9);
+		GPIOB->BSRRH = BIT(8);
+		GPIOB->BSRRH = BIT(9);
+	}
+*/	
 
 	////////////////////////////////////////////////////////////////////
 	// I2C Config
@@ -141,11 +160,9 @@ int i2c_init(i2c_t *i2c, i2c_mode_t mode, uint32_t speed){
 	i2c_init_s.I2C_Mode = I2C_Mode_I2C;
 	i2c_init_s.I2C_DutyCycle = I2C_DutyCycle_2;
 	i2c_init_s.I2C_ClockSpeed = 100000;
-	//i2c_init_s.I2C_OwnAddress1 = 0xA0;
+	i2c_init_s.I2C_OwnAddress1 = 0xA0;
 	i2c_init_s.I2C_AcknowledgedAddress = I2C_AcknowledgedAddress_7bit;
 	i2c_init_s.I2C_Ack = I2C_Ack_Enable;
-
-	I2C_Init(i2c->i2c, &i2c_init_s);
 
 	////////////////////////////////////////////////////////////////////
 	// Interrupt Config
@@ -172,6 +189,8 @@ int i2c_init(i2c_t *i2c, i2c_mode_t mode, uint32_t speed){
 	////////////////////////////////////////////////////////////////////
 
 	I2C_Cmd(i2c->i2c, ENABLE);
+
+	I2C_Init(i2c->i2c, &i2c_init_s);
 
 	i2c->mode = mode;
 
@@ -203,14 +222,46 @@ void i2c_unlock(i2c_t *i2c){
 	i2c->lock = 0;
 }
 
+void i2c_write_byte(i2c_t *i2c, uint8_t devaddr, uint8_t addr, uint8_t value){
+	i2c_write(i2c, devaddr, addr, &value, 1);
+	while(!i2c->done);
+}
+
+uint8_t i2c_read_byte(i2c_t *i2c, uint8_t devaddr, uint8_t addr){
+	uint8_t result;
+	i2c_read(i2c, devaddr, addr, &result, 1);
+	while(!i2c->done);
+	return result;
+}
+
 void i2c_write(i2c_t *i2c, uint8_t devaddr, uint8_t addr, uint8_t *buffer, uint8_t count){
 	i2c_spinlock(i2c);
 	i2c->op = I2C_OP_WRITE;
 	i2c->addr = addr;
 	i2c->devaddr = devaddr;
 	i2c->count = count;
+	i2c->buffer = buffer;
 	i2c->state = I2C_ST_MASTER_REQ;
 	i2c->done = 0;
+
+	while(i2c->i2c->SR2 & I2C_SR2_BUSY);
+
+	I2C_AcknowledgeConfig(i2c->i2c, ENABLE);
+	I2C_GenerateSTART(i2c->i2c, ENABLE);
+}
+
+void i2c_read(i2c_t *i2c, uint8_t devaddr, uint8_t addr, uint8_t *buffer, uint8_t count){
+	i2c_spinlock(i2c);
+	i2c->op = I2C_OP_READ;
+	i2c->addr = addr;
+	i2c->devaddr = devaddr;
+	i2c->count = count;
+	i2c->buffer = buffer;
+	i2c->state = I2C_ST_MASTER_REQ;
+	i2c->done = 0;
+
+	while(i2c->i2c->SR2 & I2C_SR2_BUSY);
+
 	I2C_AcknowledgeConfig(i2c->i2c, ENABLE);
 	I2C_GenerateSTART(i2c->i2c, ENABLE);
 }
@@ -292,17 +343,23 @@ extern void inline i2c_write_isr_evt(i2c_t *RESTRICT const i2c){
 	case I2C_ST_ADDRESSED:
 		if(i2c_check_evt(event, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED)){
 			I2C_SendData(i2c->i2c, i2c->addr);
-			i2c->state = I2C_ST_ADDR_TXED;
+			i2c->state = I2C_ST_WRITING;
 		}
 		break;
-	case I2C_ST_ADDR_TXED:
+	case I2C_ST_WRITING:
 		if(I2C_GetFlagStatus(i2c->i2c, I2C_FLAG_BTF)){
 			I2C_SendData(i2c->i2c, *(i2c->buffer));
 			if(--i2c->count == 0){
 				I2C_GenerateSTOP(i2c->i2c, ENABLE);
+				i2c->state = I2C_ST_CLOSING_WRITE;
 			}
 		}
 		break;
+	case I2C_ST_CLOSING_WRITE:
+		i2c->done = 1;
+		i2c_unlock(i2c);
+		i2c->state = I2C_ST_IDLE;
+		break;	
 	}
 }
 
@@ -311,9 +368,14 @@ extern void inline i2c_read_isr_err(i2c_t *RESTRICT const i2c){
 }
 
 extern void inline i2c_write_isr_err(i2c_t *RESTRICT const i2c){
-	if((i2c->i2c->SR1 & 0xFF00) != 0){
-		i2c->i2c->SR1 &= 0xFF00;
-	} else {
+	uint32_t const event = I2C_GetLastEvent(i2c->i2c);
+	if(i2c->state == I2C_ST_IDLE){
+		if((i2c->i2c->SR1 & 0xFF00) != 0){
+			i2c->i2c->SR1 &= 0xFF00;
+		} else if(event){
+			while(1);
+		}
+	} else if(event){
 		while(1);
 	}
 }

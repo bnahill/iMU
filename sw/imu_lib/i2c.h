@@ -109,5 +109,11 @@ int i2c_init(i2c_t *i2c, i2c_mode_t mode, uint32_t speed);
  */
 void i2c_write(i2c_t *i2c, uint8_t devaddr, uint8_t addr, uint8_t *buffer, uint8_t count);
 
+void i2c_write_byte(i2c_t *i2c, uint8_t devaddr, uint8_t addr, uint8_t value);
+
+void i2c_read(i2c_t *i2c, uint8_t devaddr, uint8_t addr, uint8_t *buffer, uint8_t count);
+
+uint8_t i2c_read_byte(i2c_t *i2c, uint8_t devaddr, uint8_t addr);
+
 #endif
 

@@ -5,6 +5,19 @@
 #include "sensor_config.h"
 #include "i2c.h"
 
+typedef enum {
+	LSM_RATE_OFF  = 0,
+	LSM_RATE_1    = 1,
+	LSM_RATE_10   = 2,
+	LSM_RATE_25   = 3,
+	LSM_RATE_50   = 4,
+	LSM_RATE_100  = 5,
+	LSM_RATE_200  = 6,
+	LSM_RATE_400  = 7,
+	LSM_RATE_LP16 = 2,
+	LSM_RATE_LP53 = 2
+} lsm_rate_t;
+
 typedef struct {
 	euclidean3_t mag;
 	euclidean3_t acc;
