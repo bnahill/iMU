@@ -439,7 +439,7 @@ extern void inline i2c_write_isr_err(i2c_t *RESTRICT const i2c){
 			while(1);
 		}
 	} else if(event){
-		while(1);
+		//while(1);
 	}
 }
 	

@@ -44,7 +44,7 @@ typedef struct {
  */
 typedef struct {
 	//! The SPI device
-	SPI_TypeDef *const spi;
+	SPI_TypeDef * const spi;
 	//! The current transfer
 	spi_transfer_t *xfer;
 	//! A flag to indicate that the device is already configured
@@ -63,7 +63,7 @@ void spi_init(spi_t *spi);
  @brief Configure a GPIO pin for use to control a slave device
  @param pin The pin to configure
  */
-void spi_init_slave(const gpio_pin_t *pin);
+void spi_init_slave(gpio_pin_t *pin);
 
 /*!
  @brief Begin a SPI transfer

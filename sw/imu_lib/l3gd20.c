@@ -55,7 +55,7 @@ gyro_t gyro2 = {
 	.nss = {GPIOE, BIT(15)},
 	.dps_scale = GYRO_SCALE_500_DPS,
 	.spi = &spi1
-}
+};
 #endif
 
 //! A buffer for the command to read values from a gyroscope
@@ -77,6 +77,12 @@ static volatile int is_done;
 //////////////////////////////////////////////////////////////////////////////
 
 void l3gd20_init(void){
+#if HAS_GYRO_1
+	spi_init_slave(&gyro1.nss);
+#endif
+#if HAS_GYRO_2
+	spi_init_slave(&gyro2.nss);
+#endif
 #if HAS_GYRO_1
 	l3gd20_device_init(&gyro1);
 #endif
@@ -117,6 +123,7 @@ uint8_t l3gd20_transfer_complete(void){
 	#if HAS_GYRO_2
 		ret &= gyro2.xfer.done;
 	#endif
+	return ret;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -152,10 +159,8 @@ static void l3gd20_initialize_device(gyro_t *RESTRICT gyro){
 
 static void l3gd20_device_init(gyro_t *gyro){
 	spi_init(gyro->spi);
-	spi_init_slave(&gyro->nss);
 	l3gd20_initialize_device(gyro);
 }
-
 
 
 static void l3gd20_write_register(gyro_t *RESTRICT gyro, uint8_t addr, uint8_t value){

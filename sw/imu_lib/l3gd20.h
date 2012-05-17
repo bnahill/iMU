@@ -8,7 +8,7 @@
 typedef struct {
 	euclidean3_t        reading;
 	float               const dps_scale;
-	gpio_pin_t          const nss;
+	gpio_pin_t          nss;
 	spi_t               * const spi;
 	uint8_t             r_buff[7];
 	spi_transfer_t      xfer;

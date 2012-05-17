@@ -45,7 +45,7 @@
 
 	#define HAS_STTS     1
 	#define HAS_GYRO_1   1
-	#define HAS_GYRO_2   1
+	#define HAS_GYRO_2   0
 	#define HAS_MAGACC_1 1
 	#define HAS_MAGACC_2 1
 #endif

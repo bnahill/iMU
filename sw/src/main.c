@@ -21,7 +21,7 @@
 int main(void){
 	GPIO_InitTypeDef GPIO_InitStructure;
 	
-	// GPIOD Periph clock enable
+	// All GPIO clock enable
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA |
 	                       RCC_AHB1Periph_GPIOB |
 	                       RCC_AHB1Periph_GPIOC |
