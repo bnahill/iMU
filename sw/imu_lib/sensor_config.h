@@ -25,8 +25,6 @@
 #define HAS_GYRO_1 1
 #define HAS_GYRO_2 0
 
-#define GYRO_USE_DMA 1
-
 //////////////////////////////////////////////////////////////////////////////
 // LSM303
 //////////////////////////////////////////////////////////////////////////////
@@ -59,6 +57,20 @@
 #define USE_I2C1 ((HAS_STTS || HAS_MAGACC_1) ? 1 : 0)
 #define USE_I2C2 ((HAS_MAGACC_2) ? 1 : 0)
 #define USE_I2C3 0
+
+#define USE_SPI1 ((HAS_GYRO_1 || HAS_GYRO_2) ? 1 : 0)
+#define USE_SPI2 0
+
+typedef struct {
+	GPIO_TypeDef *const gpio;
+	uint16_t const pin;
+	uint8_t const pinsrc;
+} af_gpio_pin_t;
+
+typedef struct {
+	GPIO_TypeDef *const gpio;
+	uint16_t const pin;
+} gpio_pin_t;
 
 typedef struct {
 	float x;

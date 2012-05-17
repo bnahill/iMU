@@ -37,7 +37,7 @@ int main(void){
 	GPIO_Init(LED_GPIO, &GPIO_InitStructure);
 	
 	// Configure SysTick for 400ms period	
-	if(!tick_start(10.0)){
+	if(!tick_start(400.0)){
 		while(1);
 	}
 	
@@ -46,7 +46,7 @@ int main(void){
 	
 	while (1){
 		tick_wait(1);
-		l3gd20_read();
+		l3gd20_read_sync();
 		lsm303_read();
 	}
 }

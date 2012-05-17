@@ -66,7 +66,6 @@ set(STM_SOURCES
 	${STD_PERIPH_SRC_DIR}/stm32f4xx_i2c.c
 	${STD_PERIPH_SRC_DIR}/stm32f4xx_syscfg.c
 	${STD_PERIPH_SRC_DIR}/stm32f4xx_cryp_aes.c
-
 	${STD_PERIPH_SRC_DIR}/stm32f4xx_exti.c
 	${STD_PERIPH_SRC_DIR}/stm32f4xx_iwdg.c
 	${STD_PERIPH_SRC_DIR}/stm32f4xx_tim.c
@@ -331,6 +330,7 @@ set(CMSIS_DSP_SOURCES
 set(IMU_DIR imu_lib)
 set(IMU_SOURCES
     ${IMU_DIR}/i2c.c
+    ${IMU_DIR}/spi.c
     ${IMU_DIR}/l3gd20.c
     ${IMU_DIR}/lsm303.c
 )
