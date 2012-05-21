@@ -3,6 +3,7 @@
 #include "tick.h"
 #include "l3gd20.h"
 #include "lsm303.h"
+#include "sdio.h"
 
 //! @defgroup util Utilities
 
@@ -20,6 +21,8 @@
 
 int main(void){
 	GPIO_InitTypeDef GPIO_InitStructure;
+	SD_Error sderr;
+	SD_CardInfo ci;
 	
 	// All GPIO clock enable
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA |
@@ -40,9 +43,18 @@ int main(void){
 	if(!tick_start(400.0)){
 		while(1);
 	}
-	
+/*	
+	if((SD_Init() == SD_OK) && SD_Detect()){
+		sderr = SD_GetCardInfo(&ci);
+		if(sderr == SD_OK){
+			while(1);
+		}
+	}
+*/	
+
 	lsm303_init();
 	l3gd20_init();
+
 	
 	while (1){
 		tick_wait(1);

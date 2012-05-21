@@ -328,11 +328,14 @@ set(CMSIS_DSP_SOURCES
 )
 
 set(IMU_DIR imu_lib)
+
 set(IMU_SOURCES
     ${IMU_DIR}/i2c.c
     ${IMU_DIR}/spi.c
     ${IMU_DIR}/l3gd20.c
     ${IMU_DIR}/lsm303.c
+    ${IMU_DIR}/sdio.c
+    ${IMU_DIR}/sdio_ll.c
 )
 
 
@@ -352,6 +355,7 @@ set(APP_SOURCES
 	${APP_DIR}/main.c
 	${APP_DIR}/tick.c
 )
+
 
 ##############################################################
 # Executable and library targets
