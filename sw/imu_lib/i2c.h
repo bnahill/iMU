@@ -27,6 +27,13 @@ typedef enum {
 	I2C_ST_CLOSING_WRITE
 } i2c_state_t;
 
+//! @name I2C transfer termination flags
+//! @{
+#define I2C_XFER_FLAG_DONE 0x01
+#define I2C_XFER_FLAG_ERR_MASK 0xFE
+#define I2C_XFER_ERR_NOSLAVE 0x02
+//! @}
+
 typedef struct _i2c_transfer {
 	i2c_op_t op;
 	//! The I2C address of the slave
@@ -37,8 +44,8 @@ typedef struct _i2c_transfer {
 	uint8_t *buffer;
 	//! The number of bytes to read or write
 	uint8_t count;
-	//! A flag to indicate completion
-	uint8_t done;
+	//! A flag to indicate completion and errors
+	uint8_t done;;
 	struct _i2c_transfer *next;
 } i2c_transfer_t;
 

@@ -326,6 +326,13 @@ extern int inline i2c_check_evt(uint32_t event1, uint32_t event2){
 	return 0;
 }
 
+extern void inline i2c_next_xfer(i2c_t *RESTRICT const i2c){
+	if(i2c->xfer->next){
+		i2c_run_xfer(i2c, i2c->xfer->next);
+	} else {
+		i2c->xfer = NULL;
+	}
+}
 extern void inline i2c_read_isr_evt(i2c_t *RESTRICT const i2c){
 	uint32_t const event = I2C_GetLastEvent(i2c->i2c);
 	switch(i2c->state){
@@ -378,11 +385,7 @@ extern void inline i2c_read_isr_evt(i2c_t *RESTRICT const i2c){
 				i2c->state = I2C_ST_IDLE;
 				I2C_GenerateSTOP(i2c->i2c, ENABLE);
 				i2c->xfer->done = 1;
-				if(i2c->xfer->next){
-					i2c_run_xfer(i2c, i2c->xfer->next);
-				} else {
-					i2c->xfer = NULL;
-				}
+				i2c_next_xfer(i2c);
 			}
 		}
 		break;
@@ -417,11 +420,7 @@ extern void inline i2c_write_isr_evt(i2c_t *RESTRICT const i2c){
 	case I2C_ST_CLOSING_WRITE:
 		i2c->xfer->done = 1;
 		i2c->state = I2C_ST_IDLE;
-		if(i2c->xfer->next){
-			i2c_run_xfer(i2c, i2c->xfer->next);
-		} else {
-			i2c->xfer = NULL;
-		}
+		i2c_next_xfer(i2c);
 		break;	
 	}
 }
@@ -432,14 +431,25 @@ extern void inline i2c_read_isr_err(i2c_t *RESTRICT const i2c){
 
 extern void inline i2c_write_isr_err(i2c_t *RESTRICT const i2c){
 	uint32_t const event = I2C_GetLastEvent(i2c->i2c);
-	if(i2c->state == I2C_ST_IDLE){
+	switch(i2c->state){
+	case I2C_ST_IDLE:
 		if((i2c->i2c->SR1 & 0xFF00) != 0){
 			i2c->i2c->SR1 &= 0xFF00;
 		} else if(event){
 			while(1);
 		}
-	} else if(event){
-		//while(1);
+		break;
+	case I2C_ST_ADDRESSED:
+		if(event & I2C_SR1_AF){
+			i2c->xfer->done = I2C_XFER_ERR_NOSLAVE;
+			i2c->i2c->SR1 = 0;
+			i2c_next_xfer(i2c);
+		}
+		break;
+	default:
+		if(event)
+			while(1);
+		break;
 	}
 }
 	
