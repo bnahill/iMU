@@ -64,6 +64,8 @@ static uint8_t gyro_write_buffer[7];
 //! @name Private
 //! @{
 static uint8_t l3gd20_read_register(gyro_t *RESTRICT gyro, uint8_t addr);
+static void l3gd20_configure_device(gyro_t *RESTRICT gyro);
+static void l3gd20_device_init(gyro_t *gyro);
 static void l3gd20_write_register(gyro_t *RESTRICT gyro, uint8_t addr, uint8_t value);
 static void l3gd20_transfer_sync(gyro_t *gyro, uint8_t *RESTRICT r_buff, uint8_t *RESTRICT w_buff, uint16_t len);
 static void l3gd20_device_init(gyro_t *gyro);
@@ -130,7 +132,7 @@ uint8_t l3gd20_transfer_complete(void){
 // Private support functions
 //////////////////////////////////////////////////////////////////////////////
 
-static void l3gd20_initialize_device(gyro_t *RESTRICT gyro){
+static void l3gd20_configure_device(gyro_t *RESTRICT gyro){
 	if(l3gd20_read_register(gyro, GYRO_REG_WHO_AM_I) != 0xD4)
 		while(1);
 	if(l3gd20_read_register(gyro, GYRO_REG_WHO_AM_I) != 0xD4)
@@ -159,7 +161,7 @@ static void l3gd20_initialize_device(gyro_t *RESTRICT gyro){
 
 static void l3gd20_device_init(gyro_t *gyro){
 	spi_init(gyro->spi);
-	l3gd20_initialize_device(gyro);
+	l3gd20_configure_device(gyro);
 }
 
 

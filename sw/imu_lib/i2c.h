@@ -77,8 +77,6 @@ typedef struct {
 	i2c_state_t state;
 	//! The current transfer
 	i2c_transfer_t *xfer;
-	//! A lock for mutual exclusion
-	uint32_t lock;
 	//! A pointer to the hardware configuration
 	i2c_config_t const * const config;
 } i2c_t;

@@ -80,11 +80,6 @@ i2c_t i2c3 = {
 #endif
 
 
-void inline i2c_spinlock(i2c_t *i2c);
-int inline i2c_trylock(i2c_t *i2c);
-void i2c_unlock(i2c_t *i2c);
-
-
 int i2c_init(i2c_t *i2c, i2c_mode_t mode, uint32_t speed){
 	i2c_config_t const * const conf = i2c->config;
 	GPIO_InitTypeDef gpio_init_s;
@@ -139,20 +134,6 @@ int i2c_init(i2c_t *i2c, i2c_mode_t mode, uint32_t speed){
 	gpio_init_s.GPIO_Pin = conf->sda_pin;
 	GPIO_Init(conf->sda_gpio, &gpio_init_s);
 
-
-/*
-	while(1){
-		conf->scl_gpio->BSRRL = conf->scl_pin;
-		conf->sda_gpio->BSRRH = conf->sda_pin;
-		conf->sda_gpio->BSRRL = conf->sda_pin;
-		conf->scl_gpio->BSRRH = conf->scl_pin;
-		GPIOB->BSRRL = BIT(8);
-		GPIOB->BSRRL = BIT(9);
-		GPIOB->BSRRH = BIT(8);
-		GPIOB->BSRRH = BIT(9);
-	}
-*/	
-
 	////////////////////////////////////////////////////////////////////
 	// I2C Config
 	////////////////////////////////////////////////////////////////////
@@ -196,30 +177,6 @@ int i2c_init(i2c_t *i2c, i2c_mode_t mode, uint32_t speed){
 
 	__enable_irq();
 	return 1;
-}
-
-void i2c_spinlock(i2c_t *i2c){
-	uint8_t i;
-	while(1){
-		if(i2c_trylock(i2c))
-			break;
-		for(i = 0; i != 0xFF; i++);
-	}
-}
-
-int i2c_trylock(i2c_t *i2c){
-	__disable_irq();
-	if(i2c->lock){
-		__enable_irq();
-		return 0;
-	}
-	i2c->lock = 1;
-	__enable_irq();
-	return 1;
-}
-
-void i2c_unlock(i2c_t *i2c){
-	i2c->lock = 0;
 }
 
 /*!

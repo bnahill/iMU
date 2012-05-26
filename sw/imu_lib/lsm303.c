@@ -86,7 +86,7 @@ lsm303_t magacc1 = {
 	&i2c1,
 	.rate = LSM_RATE_100,
 	.acc_fs = LSM_ACC_FS_4G,
-	.mag_fs = LSM_MAG_FS_4_0
+	.mag_fs = LSM_MAG_FS_1_3
 };
 #endif
 
@@ -97,7 +97,7 @@ lsm303_t magacc2 = {
 	&i2c2,
 	.rate = LSM_RATE_100,
 	.acc_fs = LSM_ACC_FS_4G,
-	.mag_fs = LSM_MAG_FS_4_0
+	.mag_fs = LSM_MAG_FS_1_3
 };
 #endif
 
@@ -176,18 +176,18 @@ static void lsm303_do_read(lsm303_t *lsm){
 	i2c_transfer(lsm->i2c, &acc_xfer);
 	
 	while(!acc_xfer.done);
-	tmp16 = acc_buff[0] + (acc_buff[1] << 8);
+	tmp16 = acc_buff[0] | (acc_buff[1] << 8);
 	lsm->acc.x = tmp16 * acc_scale[lsm->acc_fs];
-	tmp16 = acc_buff[2] + (acc_buff[3] << 8);
+	tmp16 = acc_buff[2] | (acc_buff[3] << 8);
 	lsm->acc.y = tmp16 * acc_scale[lsm->acc_fs];
-	tmp16 = acc_buff[4] + (acc_buff[5] << 8);
+	tmp16 = acc_buff[4] | (acc_buff[5] << 8);
 	lsm->acc.z = tmp16 * acc_scale[lsm->acc_fs];
 	while(!mag_xfer.done);
-	tmp16 = mag_buff[1] + (mag_buff[0] << 8);
+	tmp16 = mag_buff[1] | (mag_buff[0] << 8);
 	lsm->mag.x = tmp16 * mag_scale[lsm->mag_fs];
-	tmp16 = mag_buff[3] + (mag_buff[2] << 8);
+	tmp16 = mag_buff[3] | (mag_buff[2] << 8);
 	lsm->mag.z = tmp16 * mag_scale[lsm->mag_fs];
-	tmp16 = mag_buff[5] + (mag_buff[4] << 8);
+	tmp16 = mag_buff[5] | (mag_buff[4] << 8);
 	lsm->mag.y = tmp16 * mag_scale[lsm->mag_fs];
 }
 
