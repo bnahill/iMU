@@ -29,8 +29,14 @@ cmake_minimum_required(VERSION 2.8)
 
 # Path to the STM32F4 Peripheral Library driver directory
 set(STD_PERIPH_DIR STM32F4xx_StdPeriph_Driver)
+# Path to the ST USB device driver
+set(ST_USB_DEV_DIR usb_device)
+# Path to the ST USB device driver
+set(ST_USB_OTG_DIR usb_otg)
 # Path to CMSIS
 set(CMSIS_DIR CMSIS)
+# Path to IMU library drivers
+set(IMU_DIR imu_lib)
 set(MCU cortex-m4)
 
 
@@ -47,6 +53,22 @@ set(CMAKE_C_FLAGS "--std=c1x")
 set(CMAKE_EXE_LINKER_FLAGS "-Tlink.ld -flto  -Wl,-Map=${TARGET}.map,--cref,--gc-sections -nostdlib ${MCFLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
 
 set(STD_PERIPH_SRC_DIR ${STD_PERIPH_DIR}/src)
+
+set(ST_USB_DEV_SOURCES
+	${ST_USB_DEV_DIR}/Class/cdc/src/usbd_cdc_core.c
+	${ST_USB_DEV_DIR}/Core/src/usbd_core.c
+	${ST_USB_DEV_DIR}/Core/src/usbd_ioreq.c
+	${ST_USB_DEV_DIR}/Core/src/usbd_req.c
+	${ST_USB_OTG_DIR}/src/usb_core.c
+	${ST_USB_OTG_DIR}/src/usb_dcd.c
+	${ST_USB_OTG_DIR}/src/usb_dcd_int.c
+	# Application code
+	${IMU_DIR}/usb/usb_cdc.c
+	${IMU_DIR}/usb/stm32fxxx_it.c
+	${IMU_DIR}/usb/usb_bsp.c
+	${IMU_DIR}/usb/usbd_desc.c
+	${IMU_DIR}/usb/usbd_usr.c
+)
 
 set(STM_SOURCES
 	${STD_PERIPH_SRC_DIR}/misc.c
@@ -327,8 +349,6 @@ set(CMSIS_DSP_SOURCES
 	${DSP_DIR}/StatisticsFunctions/arm_max_q7.c
 )
 
-set(IMU_DIR imu_lib)
-
 set(IMU_SOURCES
     ${IMU_DIR}/i2c.c
     ${IMU_DIR}/spi.c
@@ -358,6 +378,26 @@ set(APP_SOURCES
 
 
 ##############################################################
+# Options
+##############################################################
+
+option(USB_DEV "Build with USB device support" ON)
+if(USB_DEV)
+    message("\tBuilding with USB device support")
+    add_definitions(-DUSB_DEV=1)
+else(USB_DEV)
+    message("\tBuilding without USB device support")
+    add_definitions(-DUSB_DEV=0)
+endif(USB_DEV)
+
+option(CMSIS_DSP "Build with CMSIS DSP library" OFF)
+if(CMSIS_DSP)
+    message("\tBuilding with CMSIS DSP library")
+else(CMSIS_DSP)
+    message("\tBuilding without CMSIS DSP library")
+endif(CMSIS_DSP)
+
+##############################################################
 # Executable and library targets
 ##############################################################
 
@@ -372,12 +412,33 @@ include_directories(
 	${IMU_DIR}
 )
 
+if(CMSIS_DSP)
+	add_library(cmsis_dsp STATIC ${CMSIS_DSP_SOURCES})
+	set(LIBS ${LIBS} cmsis_dsp)
+	set_target_properties(cmsis_dsp PROPERTIES COMPILE_FLAGS "-w -O0")
+endif(CMSIS_DSP)
+
+if(USB_DEV)
+	add_definitions(-DUSE_USB_OTG_FS -DUSE_EMBEDDED_PHY)
+	add_library(st_usb_device STATIC ${ST_USB_DEV_SOURCES})
+	set(LIBS ${LIBS} st_usb_device)
+	set_target_properties(st_usb_device PROPERTIES COMPILE_FLAGS "-w -O0")
+	include_directories(
+		${ST_USB_OTG_DIR}/inc
+		${ST_USB_DEV_DIR}/inc
+		${ST_USB_DEV_DIR}/Core/inc
+		${ST_USB_DEV_DIR}/Class/cdc/inc
+		${IMU_DIR}/usb
+	)
+endif(USB_DEV)
+
 add_library(imu_lib STATIC ${IMU_SOURCES})
 add_library(std_periph STATIC ${STM_SOURCES})
-add_library(cmsis_dsp STATIC ${CMSIS_DSP_SOURCES})
+set(LIBS ${LIBS} imu_lib std_periph)
+
 target_link_libraries(imu_lib std_periph)
 add_executable(${OUTFILE} ${APP_SOURCES} ${SYSTEM_SOURCES})
-target_link_libraries(${OUTFILE} std_periph cmsis_dsp imu_lib)
+target_link_libraries(${OUTFILE} ${LIBS})
 
 # Funky workaround to make target dependent on linker script
 add_custom_command(OUTPUT link.ld COMMAND cat ${CMAKE_SOURCE_DIR}/stm32_flash.ld > link.ld DEPENDS ${CMAKE_SOURCE_DIR}/stm32_flash.ld)
@@ -387,7 +448,7 @@ add_dependencies(${OUTFILE} linker_script)
 # Warnings only for application code -- Optimizations only on ST/ARM code
 set_target_properties(${OUTFILE} PROPERTIES COMPILE_FLAGS "-W -O0")
 set_target_properties(std_periph PROPERTIES COMPILE_FLAGS "-w -O0")
-set_target_properties(cmsis_dsp PROPERTIES COMPILE_FLAGS "-w -O0")
+
 ##############################################################
 # Ctags
 ##############################################################
