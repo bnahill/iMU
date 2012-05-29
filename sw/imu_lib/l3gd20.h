@@ -5,21 +5,46 @@
 #include "spi.h"
 #include "sensor_config.h"
 
+typedef enum {
+	L3GD20_ODR_95 = 0,
+	L3GD20_ODR_190 = 1,
+	L3GD20_ODR_380 = 2,
+	L3GD20_ODR_760 = 3
+} l3gd20_odr_t;
+
+typedef enum {
+	L3GD20_LP_0 = 0,
+	L3GD20_LP_1 = 1,
+	L3GD20_LP_2 = 2,
+	L3GD20_LP_3 = 3
+} l3gd20_lp_cutoff_t;
+
+typedef enum {
+	L3GD20_HP_OFF = -1,
+	L3GD20_HP_0   = 0,
+	L3GD20_HP_1   = 1,
+	L3GD20_HP_2   = 2,
+	L3GD20_HP_3   = 3
+} l3gd20_hp_cutoff_t;
+
 typedef struct {
 	euclidean3_t        reading;
 	float               const dps_scale;
 	gpio_pin_t          nss;
 	spi_t               * const spi;
+	l3gd20_odr_t        odr;
+	l3gd20_lp_cutoff_t  lp_cutoff;
+	l3gd20_hp_cutoff_t  hp_cutoff;
 	uint8_t             r_buff[7];
 	spi_transfer_t      xfer;
-} gyro_t;
+} l3gd20_t;
 
 #if HAS_GYRO_1
-extern gyro_t gyro1;
+extern l3gd20_t gyro1;
 #endif
 
 #if HAS_GYRO_2
-extern gyro_t gyro2;
+extern l3gd20_t gyro2;
 #endif
 
 /*!

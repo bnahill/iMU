@@ -41,7 +41,7 @@
 #define GYRO_SCALE_2000_DPS   (70.0/1000.0)
 
 #if HAS_GYRO_1
-gyro_t gyro1 = {
+l3gd20_t gyro1 = {
 	.reading = {0.0, 0.0, 0.0},
 	.nss = {GPIOC, BIT(1)},
 	.dps_scale = GYRO_SCALE_500_DPS,
@@ -50,7 +50,7 @@ gyro_t gyro1 = {
 #endif
 
 #if HAS_GYRO_2
-gyro_t gyro2 = {
+l3gd20_t gyro2 = {
 	.reading = {0.0, 0.0, 0.0},
 	.nss = {GPIOE, BIT(15)},
 	.dps_scale = GYRO_SCALE_500_DPS,
@@ -63,14 +63,13 @@ static uint8_t gyro_write_buffer[7];
 
 //! @name Private
 //! @{
-static uint8_t l3gd20_read_register(gyro_t *RESTRICT gyro, uint8_t addr);
-static void l3gd20_configure_device(gyro_t *RESTRICT gyro);
-static void l3gd20_device_init(gyro_t *gyro);
-static void l3gd20_write_register(gyro_t *RESTRICT gyro, uint8_t addr, uint8_t value);
-static void l3gd20_transfer_sync(gyro_t *gyro, uint8_t *RESTRICT r_buff, uint8_t *RESTRICT w_buff, uint16_t len);
-static void l3gd20_device_init(gyro_t *gyro);
-static void l3gd20_read_sensor(gyro_t *RESTRICT gyro);
-static void l3gd20_update_device(gyro_t * const gyro);
+static uint8_t l3gd20_read_register(l3gd20_t *RESTRICT gyro, uint8_t addr);
+static void l3gd20_configure_device(l3gd20_t *RESTRICT gyro);
+static void l3gd20_device_init(l3gd20_t *gyro);
+static void l3gd20_write_register(l3gd20_t *RESTRICT gyro, uint8_t addr, uint8_t value);
+static void l3gd20_transfer_sync(l3gd20_t *gyro, uint8_t *RESTRICT r_buff, uint8_t *RESTRICT w_buff, uint16_t len);
+static void l3gd20_read_sensor(l3gd20_t *RESTRICT gyro);
+static void l3gd20_update_device(l3gd20_t * const gyro);
 static volatile int is_done;
 // @}
 
@@ -132,7 +131,7 @@ uint8_t l3gd20_transfer_complete(void){
 // Private support functions
 //////////////////////////////////////////////////////////////////////////////
 
-static void l3gd20_configure_device(gyro_t *RESTRICT gyro){
+static void l3gd20_configure_device(l3gd20_t *RESTRICT gyro){
 	if(l3gd20_read_register(gyro, GYRO_REG_WHO_AM_I) != 0xD4)
 		while(1);
 	if(l3gd20_read_register(gyro, GYRO_REG_WHO_AM_I) != 0xD4)
@@ -159,20 +158,20 @@ static void l3gd20_configure_device(gyro_t *RESTRICT gyro){
 	l3gd20_write_register(gyro, GYRO_REG_FIFO_CTRL, 0x00);
 }
 
-static void l3gd20_device_init(gyro_t *gyro){
+static void l3gd20_device_init(l3gd20_t *gyro){
 	spi_init(gyro->spi);
 	l3gd20_configure_device(gyro);
 }
 
 
-static void l3gd20_write_register(gyro_t *RESTRICT gyro, uint8_t addr, uint8_t value){
+static void l3gd20_write_register(l3gd20_t *RESTRICT gyro, uint8_t addr, uint8_t value){
 	uint8_t read_buff[2], write_buff[2];
 	write_buff[0] = GYRO_FLAG_WRITE | GYRO_FLAG_NOSEQ | addr;
 	write_buff[1] = value;
 	l3gd20_transfer_sync(gyro, read_buff, write_buff, 2);
 }
 
-static uint8_t l3gd20_read_register(gyro_t *RESTRICT gyro, uint8_t addr){
+static uint8_t l3gd20_read_register(l3gd20_t *RESTRICT gyro, uint8_t addr){
 	uint8_t read_buff[2], write_buff[2];
 	write_buff[0] = GYRO_FLAG_READ | GYRO_FLAG_NOSEQ | addr;
 	write_buff[1] = 0;
@@ -180,7 +179,7 @@ static uint8_t l3gd20_read_register(gyro_t *RESTRICT gyro, uint8_t addr){
 	return read_buff[1];
 }
 
-static void l3gd20_read_sensor(gyro_t *RESTRICT gyro){
+static void l3gd20_read_sensor(l3gd20_t *RESTRICT gyro){
 	int16_t tmp;
 
 	gyro_write_buffer[0] = GYRO_FLAG_READ | GYRO_FLAG_SEQ | GYRO_REG_OUT_X_L;
@@ -196,7 +195,7 @@ static void l3gd20_read_sensor(gyro_t *RESTRICT gyro){
 
 
 
-static void l3gd20_update_device(gyro_t * const gyro){
+static void l3gd20_update_device(l3gd20_t * const gyro){
 	int16_t tmp;
 	tmp = (gyro->r_buff[2] << 8) | gyro->r_buff[1];
 	gyro->reading.x = tmp * gyro->dps_scale;
@@ -206,7 +205,7 @@ static void l3gd20_update_device(gyro_t * const gyro){
 	gyro->reading.z = tmp * gyro->dps_scale;
 }
 
-static void l3gd20_transfer_sync(gyro_t *gyro, uint8_t *RESTRICT r_buff, uint8_t *RESTRICT w_buff, uint16_t len){
+static void l3gd20_transfer_sync(l3gd20_t *gyro, uint8_t *RESTRICT r_buff, uint8_t *RESTRICT w_buff, uint16_t len){
 	spi_transfer_t xfer = {
 		.read_buff = r_buff,
 		.write_buff = w_buff,
