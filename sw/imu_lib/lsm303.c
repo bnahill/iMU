@@ -177,11 +177,11 @@ static void lsm303_do_read(lsm303_t *lsm){
 	
 	while(!acc_xfer.done);
 	tmp16 = acc_buff[0] | (acc_buff[1] << 8);
-	lsm->acc.x = tmp16 * acc_scale[lsm->acc_fs];
+	lsm->acc.x = (tmp16 >> 4) * acc_scale[lsm->acc_fs];
 	tmp16 = acc_buff[2] | (acc_buff[3] << 8);
-	lsm->acc.y = tmp16 * acc_scale[lsm->acc_fs];
+	lsm->acc.y = (tmp16 >> 4) * acc_scale[lsm->acc_fs];
 	tmp16 = acc_buff[4] | (acc_buff[5] << 8);
-	lsm->acc.z = tmp16 * acc_scale[lsm->acc_fs];
+	lsm->acc.z = (tmp16 >> 4) * acc_scale[lsm->acc_fs];
 	while(!mag_xfer.done);
 	tmp16 = mag_buff[1] | (mag_buff[0] << 8);
 	lsm->mag.x = tmp16 * mag_scale[lsm->mag_fs];
