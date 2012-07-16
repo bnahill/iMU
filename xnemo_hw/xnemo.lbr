@@ -593,6 +593,62 @@
 <pad name="9" x="-1.27" y="-2.54" drill="0.6" diameter="1.016"/>
 <pad name="10" x="1.27" y="-2.54" drill="0.6" diameter="1.016"/>
 </package>
+<package name="ST_HCLGA-16L">
+<smd name="P$1" x="1.25" y="1" dx="0.5" dy="0.25" layer="1"/>
+<smd name="P$2" x="1.25" y="0.5" dx="0.5" dy="0.25" layer="1"/>
+<smd name="P$3" x="1.25" y="0" dx="0.5" dy="0.25" layer="1"/>
+<smd name="P$4" x="1.25" y="-0.5" dx="0.5" dy="0.25" layer="1"/>
+<smd name="P$5" x="1.25" y="-1" dx="0.5" dy="0.25" layer="1"/>
+<smd name="P$6" x="0.5" y="-1.25" dx="0.5" dy="0.25" layer="1" rot="R90"/>
+<smd name="P$7" x="0" y="-1.25" dx="0.5" dy="0.25" layer="1" rot="R90"/>
+<smd name="P$8" x="-0.5" y="-1.25" dx="0.5" dy="0.25" layer="1" rot="R90"/>
+<smd name="P$9" x="-1.25" y="-1" dx="0.5" dy="0.25" layer="1" rot="R180"/>
+<smd name="P$10" x="-1.25" y="-0.5" dx="0.5" dy="0.25" layer="1" rot="R180"/>
+<smd name="P$11" x="-1.25" y="0" dx="0.5" dy="0.25" layer="1" rot="R180"/>
+<smd name="P$12" x="-1.25" y="0.5" dx="0.5" dy="0.25" layer="1" rot="R180"/>
+<smd name="P$13" x="-1.25" y="1" dx="0.5" dy="0.25" layer="1" rot="R180"/>
+<smd name="P$14" x="-0.5" y="1.25" dx="0.5" dy="0.25" layer="1" rot="R270"/>
+<smd name="P$15" x="0" y="1.25" dx="0.5" dy="0.25" layer="1" rot="R270"/>
+<smd name="P$16" x="0.5" y="1.25" dx="0.5" dy="0.25" layer="1" rot="R270"/>
+<wire x1="-1.5" y1="1.5" x2="1.5" y2="1.5" width="0.127" layer="21"/>
+<wire x1="1.5" y1="1.5" x2="1.5" y2="-1.5" width="0.127" layer="21"/>
+<wire x1="1.5" y1="-1.5" x2="-1.5" y2="-1.5" width="0.127" layer="21"/>
+<wire x1="-1.5" y1="-1.5" x2="-1.5" y2="1.5" width="0.127" layer="21"/>
+<text x="0" y="-1.75" size="1.27" layer="25" font="vector" align="top-center">&gt;NAME</text>
+</package>
+<package name="ALPS_SKQG">
+<smd name="1_2" x="3.1" y="1.8" dx="1.1" dy="1.8" layer="1" rot="R90"/>
+<smd name="2_2" x="3.1" y="-1.8" dx="1.1" dy="1.8" layer="1" rot="R90"/>
+<smd name="1_1" x="-3.1" y="1.8" dx="1.1" dy="1.8" layer="1" rot="R90"/>
+<smd name="2_1" x="-3.1" y="-1.8" dx="1.1" dy="1.8" layer="1" rot="R90"/>
+<wire x1="-2.6" y1="2.6" x2="2.6" y2="2.6" width="0.127" layer="21"/>
+<wire x1="-2.6" y1="-2.6" x2="2.6" y2="-2.6" width="0.127" layer="21"/>
+<wire x1="-2.6" y1="2.6" x2="-2.6" y2="-2.6" width="0.127" layer="21"/>
+<wire x1="2.6" y1="2.6" x2="2.6" y2="-2.6" width="0.127" layer="21"/>
+<circle x="0" y="0" radius="1" width="0.127" layer="21"/>
+<text x="0" y="-2.8" size="1.27" layer="25" font="vector" align="top-center">&gt;NAME</text>
+</package>
+<package name="SMD0402">
+<description>EIA 0402 SMD package</description>
+<smd name="P$1" x="0.5" y="0" dx="0.6" dy="0.5" layer="1"/>
+<smd name="P$2" x="-0.5" y="0.01" dx="0.6" dy="0.5" layer="1"/>
+<text x="0" y="-0.36" size="0.6096" layer="25" font="vector" align="top-center">&gt;NAME</text>
+<text x="0" y="0.37" size="0.6096" layer="27" font="vector" align="bottom-center">&gt;VALUE</text>
+<wire x1="-0.5" y1="0.25" x2="0.5" y2="0.25" width="0.127" layer="21"/>
+<wire x1="0.5" y1="0.25" x2="0.5" y2="-0.25" width="0.127" layer="21"/>
+<wire x1="0.5" y1="-0.25" x2="-0.5" y2="-0.25" width="0.127" layer="21"/>
+<wire x1="-0.5" y1="-0.25" x2="-0.5" y2="0.25" width="0.127" layer="21"/>
+</package>
+<package name="SMD0603">
+<smd name="P$1" x="0.9" y="0" dx="0.6" dy="0.9" layer="1" rot="R90"/>
+<smd name="P$2" x="-0.9" y="0" dx="0.6" dy="0.9" layer="1" rot="R90"/>
+<wire x1="-0.75" y1="0.4" x2="0.75" y2="0.4" width="0.127" layer="21"/>
+<wire x1="0.75" y1="0.4" x2="0.75" y2="-0.4" width="0.127" layer="21"/>
+<wire x1="0.75" y1="-0.4" x2="-0.75" y2="-0.4" width="0.127" layer="21"/>
+<wire x1="-0.75" y1="-0.4" x2="-0.75" y2="0.4" width="0.127" layer="21"/>
+<text x="0" y="0.5" size="0.6096" layer="27" font="vector" align="bottom-center">&gt;VALUE</text>
+<text x="0" y="-0.5" size="0.6096" layer="25" font="vector" align="top-center">&gt;NAME</text>
+</package>
 </packages>
 <symbols>
 <symbol name="L3GD20">
@@ -1256,6 +1312,60 @@
 <text x="0" y="-7.62" size="1.778" layer="95">&gt;NAME</text>
 <text x="0" y="7.62" size="1.778" layer="96" rot="MR180">&gt;VALUE</text>
 </symbol>
+<symbol name="LPS331AP">
+<pin name="VDDIO" x="12.7" y="5.08" visible="pin" length="short" rot="R180"/>
+<pin name="NC@1" x="12.7" y="2.54" visible="pin" length="short" rot="R180"/>
+<pin name="NC@2" x="12.7" y="0" visible="pin" length="short" rot="R180"/>
+<pin name="SCL" x="12.7" y="-2.54" visible="pin" length="short" rot="R180"/>
+<pin name="GND@1" x="12.7" y="-5.08" visible="pin" length="short" rot="R180"/>
+<pin name="SDI" x="2.54" y="-15.24" visible="pin" length="short" rot="R90"/>
+<pin name="SDO" x="0" y="-15.24" visible="pin" length="short" rot="R90"/>
+<pin name="NCS" x="-2.54" y="-15.24" visible="pin" length="short" rot="R90"/>
+<pin name="INT2" x="-12.7" y="-5.08" visible="pin" length="short"/>
+<pin name="RES" x="-12.7" y="-2.54" visible="pin" length="short"/>
+<pin name="INT1" x="-12.7" y="0" visible="pin" length="short"/>
+<pin name="GND@2" x="-12.7" y="2.54" visible="pin" length="short"/>
+<pin name="GND@3" x="-12.7" y="5.08" visible="pin" length="short"/>
+<pin name="VDD" x="-2.54" y="15.24" visible="pin" length="short" rot="R270"/>
+<pin name="VCCA" x="0" y="15.24" visible="pin" length="short" rot="R270"/>
+<pin name="GND@4" x="2.54" y="15.24" visible="pin" length="short" rot="R270"/>
+<wire x1="-10.16" y1="12.7" x2="10.16" y2="12.7" width="0.254" layer="94"/>
+<wire x1="10.16" y1="12.7" x2="10.16" y2="-12.7" width="0.254" layer="94"/>
+<wire x1="10.16" y1="-12.7" x2="-10.16" y2="-12.7" width="0.254" layer="94"/>
+<wire x1="-10.16" y1="-12.7" x2="-10.16" y2="12.7" width="0.254" layer="94"/>
+<text x="5.08" y="-15.24" size="1.778" layer="95">&gt;NAME</text>
+</symbol>
+<symbol name="SWITCH_PUSH_4PIN">
+<pin name="1@2" x="0" y="5.08" visible="off" length="short" rot="R270"/>
+<pin name="2@2" x="0" y="-5.08" visible="off" length="short" rot="R90"/>
+<circle x="0" y="2.54" radius="0.254" width="0.254" layer="94"/>
+<circle x="0" y="-2.54" radius="0.254" width="0.254" layer="94"/>
+<wire x1="1.016" y1="-2.54" x2="1.016" y2="0" width="0.254" layer="94"/>
+<wire x1="1.016" y1="0" x2="1.016" y2="2.54" width="0.254" layer="94"/>
+<wire x1="1.016" y1="0" x2="1.778" y2="0" width="0.254" layer="94"/>
+<text x="2.54" y="-5.08" size="1.778" layer="95">&gt;NAME</text>
+<pin name="2@1" x="-2.54" y="-5.08" visible="off" length="short" rot="R90"/>
+<pin name="1@1" x="-2.54" y="5.08" visible="off" length="short" rot="R270"/>
+<wire x1="-2.54" y1="2.54" x2="0" y2="2.54" width="0.254" layer="94"/>
+<wire x1="0" y1="-2.54" x2="-2.54" y2="-2.54" width="0.254" layer="94"/>
+</symbol>
+<symbol name="RESISTOR">
+<pin name="P$1" x="0" y="5.08" visible="off" length="point" direction="pas" rot="R270"/>
+<pin name="P$2" x="0" y="-2.54" visible="off" length="point" direction="pas" rot="R90"/>
+<text x="-1.905" y="1.27" size="1.778" layer="95" rot="R90" align="bottom-center">&gt;NAME</text>
+<text x="1.905" y="1.27" size="1.778" layer="96" rot="R90" align="top-center">&gt;VALUE</text>
+<wire x1="0" y1="-1.27" x2="-1.27" y2="-0.9525" width="0.254" layer="94"/>
+<wire x1="-1.27" y1="-0.9525" x2="1.27" y2="-0.3175" width="0.254" layer="94"/>
+<wire x1="1.27" y1="-0.3175" x2="-1.27" y2="0.3175" width="0.254" layer="94"/>
+<wire x1="-1.27" y1="0.3175" x2="1.27" y2="0.9525" width="0.254" layer="94"/>
+<wire x1="1.27" y1="0.9525" x2="-1.27" y2="1.5875" width="0.254" layer="94"/>
+<wire x1="-1.27" y1="1.5875" x2="1.27" y2="2.2225" width="0.254" layer="94"/>
+<wire x1="1.27" y1="2.2225" x2="-1.27" y2="2.8575" width="0.254" layer="94"/>
+<wire x1="-1.27" y1="2.8575" x2="1.27" y2="3.4925" width="0.254" layer="94"/>
+<wire x1="0" y1="-1.27" x2="0" y2="-2.54" width="0.254" layer="94"/>
+<wire x1="1.27" y1="3.4925" x2="0" y2="3.81" width="0.254" layer="94"/>
+<wire x1="0" y1="3.81" x2="0" y2="5.08" width="0.254" layer="94"/>
+</symbol>
 </symbols>
 <devicesets>
 <deviceset name="L3GD20" prefix="U">
@@ -1624,7 +1734,7 @@
 <technology name=""/>
 </technologies>
 </device>
-<device name="_0.05X0.1_SMD" package="HEADER_2X5_0.05X0.1_THRU">
+<device name="_0.05X0.1_THRU" package="HEADER_2X5_0.05X0.1_THRU">
 <connects>
 <connect gate="G$1" pin="1" pad="1"/>
 <connect gate="G$1" pin="10" pad="10"/>
@@ -1897,6 +2007,82 @@
 <connect gate="G$1" pin="GND@2" pad="3"/>
 <connect gate="G$1" pin="LR" pad="2"/>
 <connect gate="G$1" pin="VDD" pad="6"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="LPS331AP" prefix="U">
+<gates>
+<gate name="G$1" symbol="LPS331AP" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="ST_HCLGA-16L">
+<connects>
+<connect gate="G$1" pin="GND@1" pad="P$5"/>
+<connect gate="G$1" pin="GND@2" pad="P$12"/>
+<connect gate="G$1" pin="GND@3" pad="P$13"/>
+<connect gate="G$1" pin="GND@4" pad="P$16"/>
+<connect gate="G$1" pin="INT1" pad="P$11"/>
+<connect gate="G$1" pin="INT2" pad="P$9"/>
+<connect gate="G$1" pin="NC@1" pad="P$2"/>
+<connect gate="G$1" pin="NC@2" pad="P$3"/>
+<connect gate="G$1" pin="NCS" pad="P$8"/>
+<connect gate="G$1" pin="RES" pad="P$10"/>
+<connect gate="G$1" pin="SCL" pad="P$4"/>
+<connect gate="G$1" pin="SDI" pad="P$6"/>
+<connect gate="G$1" pin="SDO" pad="P$7"/>
+<connect gate="G$1" pin="VCCA" pad="P$15"/>
+<connect gate="G$1" pin="VDD" pad="P$14"/>
+<connect gate="G$1" pin="VDDIO" pad="P$1"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="ALPS_SKQG" prefix="SW">
+<description>ALPS SKQG series tactile switch</description>
+<gates>
+<gate name="G$1" symbol="SWITCH_PUSH_4PIN" x="0" y="0"/>
+</gates>
+<devices>
+<device name="" package="ALPS_SKQG">
+<connects>
+<connect gate="G$1" pin="1@1" pad="1_1"/>
+<connect gate="G$1" pin="1@2" pad="1_2"/>
+<connect gate="G$1" pin="2@1" pad="2_1"/>
+<connect gate="G$1" pin="2@2" pad="2_2"/>
+</connects>
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+<deviceset name="RESISTOR" prefix="R" uservalue="yes">
+<gates>
+<gate name="G$1" symbol="RESISTOR" x="0" y="0"/>
+</gates>
+<devices>
+<device name="-0402" package="SMD0402">
+<connects>
+<connect gate="G$1" pin="P$1" pad="P$1"/>
+<connect gate="G$1" pin="P$2" pad="P$2"/>
+</connects>
+<technologies>
+<technology name="">
+<attribute name="VALUE" value="" constant="no"/>
+</technology>
+</technologies>
+</device>
+<device name="-0603" package="SMD0603">
+<connects>
+<connect gate="G$1" pin="P$1" pad="P$1"/>
+<connect gate="G$1" pin="P$2" pad="P$2"/>
 </connects>
 <technologies>
 <technology name=""/>
