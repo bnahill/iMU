@@ -6789,7 +6789,7 @@ Source: www.kingbright.com</description>
 <label x="-63.5" y="27.94" size="1.778" layer="95"/>
 </segment>
 </net>
-<net name="VUSB" class="0">
+<net name="VUSB" class="1">
 <segment>
 <pinref part="J1" gate="G$1" pin="VBUS"/>
 <wire x1="-63.5" y1="35.56" x2="-50.8" y2="35.56" width="0.1524" layer="91"/>
