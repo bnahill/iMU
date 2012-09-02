@@ -1,3 +1,6 @@
+#include "sensor_config.h"
+#if USE_LSM303DLHC
+
 #include "stm32f4xx_conf.h"
 #include "i2c.c"
 #include "lsm303.h"
@@ -208,5 +211,7 @@ void lsm303_read(void){
 	lsm303_do_read(&magacc2);
 #endif
 }
+
+#endif // USE_LSM303DLHC
 
 

@@ -40,6 +40,17 @@ add_definitions(${MCFLAGS})
 add_definitions(-g -ffunction-sections  -fdata-sections -Wredundant-decls -Wshadow -Wcast-qual -Wcast-align)
 add_definitions(-DUSE_STDPERIPH_DRIVER -DSTM32F4XX -DHSE_VALUE=8000000 -DARM_MATH_CM4 -D__FPU_PRESENT)
 
+
+SET(IMU "r2" CACHE STRING "Which IMU to use")
+if(${IMU} STREQUAL "r2")
+message(STATUS "Building for xNEMO r2")
+elseif(${IMU} STREQUAL "r1")
+message(STATUS "Building for xNEMO r1")
+else()
+message(FATAL_ERROR "Invalid 'IMU' parameter: " ${IMU})
+endif()
+
+
 # Eliminate the need for a bunch of extra support code that may not work on the chip anyways
 set(CMAKE_CXX_FLAGS "--std=c++0x -fno-rtti -fno-exceptions")
 # Use the new C11 standard
@@ -334,12 +345,17 @@ set(IMU_SOURCES
     ${IMU_DIR}/spi.c
     ${IMU_DIR}/l3gd20.c
     ${IMU_DIR}/lsm303.c
+    ${IMU_DIR}/adxl345.c
     ${IMU_DIR}/sdio.c
     ${IMU_DIR}/sdio_ll.c
 )
 
+if(${IMU} STREQUAL "r1")
+  set(APP_DIR src_r1)
+elseif(${IMU} STREQUAL "r2")
+  set(APP_DIR src_r2)
+endif()
 
-set(APP_DIR src)
 set(SYSTEM_DIR ${APP_DIR}/system)
 
 set(SYSTEM_SOURCES
@@ -351,11 +367,17 @@ set(SYSTEM_SOURCES
 # Please don't just ignore that assembly file...
 set_property(SOURCE ${SYSTEM_DIR}/startup_stm32f4xx.s PROPERTY LANGUAGE C)
 
-set(APP_SOURCES
-	${APP_DIR}/main.c
-	${APP_DIR}/tick.c
-)
-
+if(${IMU} STREQUAL "r1")
+  set(APP_SOURCES
+	  ${APP_DIR}/main.c
+	  ${APP_DIR}/tick.c
+  )
+elseif(${IMU} STREQUAL "r2")
+ set(APP_SOURCES
+	  ${APP_DIR}/main.c
+	  ${APP_DIR}/tick.c
+  )
+endif()
 
 ##############################################################
 # Executable and library targets
@@ -363,8 +385,8 @@ set(APP_SOURCES
 
 include_directories(
 	.
-	src
-	src/system
+	${APP_DIR}
+	${APP_DIR}/system
 	${CMSIS_DIR}/Include
 	${CMSIS_DIR}/Device/ST/STM32F4xx/Include
 	Device/ARM/ARMCM4/Include
@@ -386,8 +408,10 @@ add_dependencies(${OUTFILE} linker_script)
 
 # Warnings only for application code -- Optimizations only on ST/ARM code
 set_target_properties(${OUTFILE} PROPERTIES COMPILE_FLAGS "-W -O0")
+set_target_properties(imu_lib PROPERTIES COMPILE_FLAGS "-W -O0")
 set_target_properties(std_periph PROPERTIES COMPILE_FLAGS "-w -O0")
 set_target_properties(cmsis_dsp PROPERTIES COMPILE_FLAGS "-w -O0")
+
 ##############################################################
 # Ctags
 ##############################################################
@@ -420,12 +444,20 @@ add_custom_target(ctags
 set(GDB    ${TC_PREFIX}gdb)
 set(GDBTUI ${TC_PREFIX}gdbtui)
 
-set(GDB_ARGS -ex "target remote localhost:3333" -ex "mon reset init")
-add_custom_target(gdb COMMAND ${GDB} ${GDB_ARGS} ${OUTFILE})
-add_custom_target(gdbtui COMMAND ${GDBTUI} ${GDB_ARGS} ${OUTFILE})
-add_custom_target(ddd COMMAND ddd --gdb --debugger \"${GDB} ${GDB_ARGS}\" ${OUTFILE} > /dev/null 2>&1 &
+set(GDB_ARGS -x start.gdb)
+add_custom_target(gdb COMMAND ${GDB} ${GDB_ARGS})
+add_custom_target(gdbtui COMMAND ${GDBTUI} ${GDB_ARGS})
+add_custom_target(ddd COMMAND ddd --gdb --debugger \"${GDB} ${GDB_ARGS}\" > /dev/null 2>&1 &
 	COMMENT "Launching DDD"
 )
+
+add_dependencies(gdb gdb_script)
+add_dependencies(gdbtui gdb_script)
+add_dependencies(ddd gdb_script)
+
+add_custom_command(OUTPUT start.gdb COMMAND cat ${CMAKE_SOURCE_DIR}/start.gdb > start.gdb DEPENDS ${CMAKE_SOURCE_DIR}/start.gdb)
+add_custom_target(gdb_script ALL DEPENDS start.gdb)
+
 
 ##############################################################
 # Configuration for OpenOCD

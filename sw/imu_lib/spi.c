@@ -1,46 +1,6 @@
 #include "stm32f4xx_conf.h"
 #include "spi.h"
 
-#if USE_SPI1
-static const spi_config_t spi1_config = {
-	.af = GPIO_AF_SPI1,
-	.miso = {
-		.gpio = GPIOB,
-		.pin = BIT(4),
-		.pinsrc = GPIO_PinSource4,
-	},
-	.mosi = {
-		.gpio = GPIOB,
-		.pin = BIT(5),
-		.pinsrc = GPIO_PinSource5,
-	},
-	.sclk = {
-		.gpio = GPIOA,
-		.pin = BIT(5),
-		.pinsrc = GPIO_PinSource5,
-	},
-	.dma_rx_stream = DMA2_Stream0,
-	.dma_tx_stream = DMA2_Stream3,
-	.dma = DMA2,
-	.dma_channel = DMA_Channel_3,
-	.dma_rx_tcif = DMA_IT_TCIF0,
-	.dma_rx_tc_flag = DMA_FLAG_TCIF0,
-	.dma_tx_tc_flag = DMA_FLAG_TCIF3,
-	.dma_irq = DMA2_Stream0_IRQn,
-	.dma_clock = RCC_AHB1Periph_DMA2,
-	.clock_cmd = RCC_APB2PeriphClockCmd,
-	.clock = RCC_APB2Periph_SPI1
-};
-
-spi_t spi1 = {
-	.spi = SPI1,
-	.xfer = NULL,
-	.is_init = 0,
-	.config = &spi1_config
-};
-#define SPI1_DMA_ISR DMA2_Stream0_IRQHandler
-#endif
-
 void spi_init_slave(gpio_pin_t *pin){
 	GPIO_InitTypeDef gpio_init_s;
 	
@@ -90,10 +50,12 @@ void spi_init(spi_t *spi){
 	gpio_init_s.GPIO_Pin = conf->sclk.pin;
 	GPIO_Init(conf->sclk.gpio, &gpio_init_s);
 
-	// MISO
-	GPIO_PinAFConfig(conf->miso.gpio, conf->miso.pinsrc, conf->af);
-	gpio_init_s.GPIO_Pin = conf->miso.pin;
-	GPIO_Init(conf->miso.gpio, &gpio_init_s);
+	if(conf->mode == SPI_MODE_4WIRE){
+		// MISO
+		GPIO_PinAFConfig(conf->miso.gpio, conf->miso.pinsrc, conf->af);
+		gpio_init_s.GPIO_Pin = conf->miso.pin;
+		GPIO_Init(conf->miso.gpio, &gpio_init_s);
+	}
 	
 	// MOSI
 	GPIO_PinAFConfig(conf->mosi.gpio, conf->mosi.pinsrc, conf->af);
@@ -111,27 +73,29 @@ void spi_init(spi_t *spi){
 	dma_init_s.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
 	dma_init_s.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
 	dma_init_s.DMA_Mode = DMA_Mode_Normal;
-	dma_init_s.DMA_Priority = DMA_Priority_High;
+	dma_init_s.DMA_Priority = DMA_Priority_VeryHigh;
 	dma_init_s.DMA_FIFOMode = DMA_FIFOMode_Disable;
 	dma_init_s.DMA_FIFOThreshold = DMA_FIFOThreshold_Full;
 	dma_init_s.DMA_MemoryBurst = DMA_MemoryBurst_Single;
 	dma_init_s.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
 	dma_init_s.DMA_DIR = DMA_DIR_PeripheralToMemory;
 	DMA_Init(conf->dma_rx_stream, &dma_init_s);
-
+	dma_init_s.DMA_Priority = DMA_Priority_High;
 	dma_init_s.DMA_DIR = DMA_DIR_MemoryToPeripheral;
 	DMA_Init(conf->dma_tx_stream, &dma_init_s);
-
 
 	// Configure SPI
 	SPI_I2S_DeInit(spi->spi);
 	spi_init_s.SPI_Mode = SPI_Mode_Master;
-	spi_init_s.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+	if(conf->mode == SPI_MODE_4WIRE)
+		spi_init_s.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+	else
+		spi_init_s.SPI_Direction = SPI_Direction_1Line_Tx;
 	spi_init_s.SPI_DataSize = SPI_DataSize_8b;
 	spi_init_s.SPI_CPOL = SPI_CPOL_High;
 	spi_init_s.SPI_CPHA = SPI_CPHA_2Edge;
 	spi_init_s.SPI_NSS = SPI_NSS_Soft;
-	spi_init_s.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_256;
+	spi_init_s.SPI_BaudRatePrescaler = conf->prescaler;
 	spi_init_s.SPI_FirstBit = SPI_FirstBit_MSB;
 	spi_init_s.SPI_CRCPolynomial = 7;
 
@@ -143,14 +107,21 @@ void spi_init(spi_t *spi){
 	SPI_DMACmd(spi->spi, SPI_DMAReq_Tx, ENABLE);
 
 	// Configure DMA interrupts
-	nvic_init_s.NVIC_IRQChannel = conf->dma_irq;
-	nvic_init_s.NVIC_IRQChannelPreemptionPriority = 2;
+	nvic_init_s.NVIC_IRQChannel = conf->dma_rx_irq;
+	nvic_init_s.NVIC_IRQChannelPreemptionPriority = 0;
 	nvic_init_s.NVIC_IRQChannelSubPriority = 2;
 	nvic_init_s.NVIC_IRQChannelCmd = ENABLE;
 	NVIC_Init(&nvic_init_s);
 
-	// Only interrupt on RX complete for entire transaction
-	DMA_ITConfig(conf->dma_rx_stream, DMA_IT_TC, ENABLE);
+	if(conf->mode == SPI_MODE_3WIRE){
+		// Also need an interrupt for TX complete
+		nvic_init_s.NVIC_IRQChannelPreemptionPriority = 3;
+		nvic_init_s.NVIC_IRQChannel = conf->irq;
+		NVIC_Init(&nvic_init_s);
+		
+		SPI_I2S_ITConfig(spi->spi, SPI_I2S_IT_RXNE, DISABLE); 
+		DMA_ITConfig(conf->dma_tx_stream, DMA_IT_TC, DISABLE);
+	}
 
 	spi->is_init = 1;
 	__enable_irq();
@@ -167,15 +138,37 @@ void spi_run_xfer(spi_t *spi, spi_transfer_t *xfer){
 
 	conf->dma_rx_stream->M0AR = (uint32_t)xfer->read_buff;
 	conf->dma_tx_stream->M0AR = (uint32_t)xfer->write_buff;
-	conf->dma_rx_stream->NDTR = xfer->count;
-	conf->dma_tx_stream->NDTR = xfer->count;
+	
+	if(conf->mode == SPI_MODE_4WIRE){
+		conf->dma_rx_stream->NDTR = xfer->write_count + xfer->read_count;
+		conf->dma_tx_stream->NDTR = xfer->write_count + xfer->read_count;
 
-
-	conf->dma_rx_stream->CR |= DMA_SxCR_EN;
+		spi->spi->CR1 |= SPI_CR1_SPE;
+		xfer->read_count = 0;
+		
+		DMA_ITConfig(conf->dma_rx_stream, DMA_IT_TC, ENABLE);
+		
+		conf->dma_rx_stream->CR |= DMA_SxCR_EN;
+	} else {
+		conf->dma_rx_stream->M0AR = (uint32_t)xfer->read_buff;
+		conf->dma_rx_stream->NDTR = xfer->write_count;
+		conf->dma_tx_stream->M0AR = (uint32_t)xfer->write_buff;
+		conf->dma_tx_stream->NDTR = xfer->write_count;
+		
+		// Enable output
+		spi->spi->CR1 &= ~SPI_CR1_BIDIMODE;
+		spi->spi->CR1 |= SPI_CR1_BIDIOE;
+		
+		spi->spi->CR1 |= SPI_CR1_SPE;
+		
+		DMA_ITConfig(conf->dma_rx_stream, DMA_IT_TC, ENABLE);
+		conf->dma_rx_stream->CR |= DMA_SxCR_EN;
+	}
+	
 	conf->dma_tx_stream->CR |= DMA_SxCR_EN;
 }
 
-void spi_transfer(spi_t *spi, spi_transfer_t *RESTRICT xfer){
+void spi_transfer(spi_t *spi, spi_transfer_t *__restrict xfer){
 	spi_transfer_t *old_xfer;
 
 	// Clear the 'done' flag for this chain of transfers
@@ -199,33 +192,175 @@ void spi_transfer(spi_t *spi, spi_transfer_t *RESTRICT xfer){
 	__enable_irq();
 }
 
-void spi_dma_isr(spi_t *spi){
-	spi_config_t const * const conf = spi->config;
-	if(DMA_GetITStatus(conf->dma_rx_stream, conf->dma_rx_tcif)){
-		if(spi->xfer->nss){
-			spi->xfer->nss->gpio->BSRRL = spi->xfer->nss->pin;
-		}
-		DMA_Cmd(conf->dma_tx_stream, DISABLE);
-		DMA_Cmd(conf->dma_rx_stream, DISABLE);
-		DMA_ClearFlag(conf->dma_rx_stream, conf->dma_rx_tc_flag);
-		DMA_ClearFlag(conf->dma_tx_stream, conf->dma_tx_tc_flag);
-		DMA_ClearITPendingBit(conf->dma_rx_stream, conf->dma_rx_tcif);
 
-		spi->xfer->done = 1;
-		if(spi->xfer->next){
-			spi_run_xfer(spi, spi->xfer->next);
-		} else {
-			spi->xfer = NULL;
-		}
+inline extern void spi_wait(spi_t *__restrict spi){
+	uint16_t initial;
+	af_gpio_pin_t const * const pin = &spi->config->sclk;
+	int i;
+	for(i = 0; i < 2; i++){
+		initial = pin->gpio->IDR & pin->pin;
+		// Wait for clock transition
+		while((initial ^ (pin->gpio->IDR & pin->pin)) == 0);
 	}
-
 }
 
-#if USE_SPI1
-void SPI1_DMA_ISR(void){spi_dma_isr(&spi1);}
-#endif
 
-#if USE_SPI2
-void SPI2_DMA_ISR(void){spi_dma_isr(&spi2);}
-#endif
+#define __SPI_C_
+#include "spi_platform.h"
+
+//////////////
+// ISRs!
+//////////////
+
+void spi_rx_dma_isr(spi_t *__restrict spi){
+	spi_config_t const * const conf = spi->config;
+	spi_transfer_t * const xfer = spi->xfer;
+	if(DMA_GetITStatus(conf->dma_rx_stream, conf->dma_rx_tcif)){
+		conf->dma_rx_stream->CR &= ~DMA_SxCR_EN;
+		conf->dma_tx_stream->CR &= ~DMA_SxCR_EN;
+		DMA_ClearFlag(conf->dma_tx_stream, conf->dma_tx_tc_flag);
+		DMA_ClearFlag(conf->dma_rx_stream, conf->dma_rx_tc_flag);
+		DMA_ClearITPendingBit(conf->dma_tx_stream, conf->dma_rx_tcif);
+		DMA_ClearITPendingBit(conf->dma_rx_stream, conf->dma_rx_tcif);
+		
+		if(xfer->read_count == 0){
+			// Nothing left to do, finish.
+			if(xfer->nss){
+				xfer->nss->gpio->BSRRL = xfer->nss->pin;
+			}
+			xfer->done = 1;
+			if(xfer->next){
+				spi_run_xfer(spi, xfer->next);
+			} else {
+				spi->xfer = NULL;
+			}
+		} else if(conf->mode == SPI_MODE_3WIRE){
+			if(xfer->read_count > 1){
+				spi->spi->CR1 &= ~SPI_CR1_SPE;
+				conf->dma_rx_stream->NDTR = xfer->read_count - 1;
+				conf->dma_rx_stream->M0AR = (uint32_t)xfer->read_buff + xfer->write_count;
+					
+				// Switch directions to read
+				spi->spi->CR1 |= SPI_CR1_BIDIMODE;
+				spi->spi->CR1 &= ~SPI_CR1_BIDIOE;
+				
+				spi->spi->CR1 |= SPI_CR1_SPE;
+				
+				conf->dma_rx_stream->CR |= DMA_SxCR_EN;
+				
+				// Indicate where to write the last byte when it comes up...
+				xfer->write_count += xfer->read_count - 1;
+				// Mark that tx part is done
+				xfer->read_count = 1;
+			} else {
+				if((spi->spi->CR1 & SPI_CR1_BIDIMODE) == 0){
+					// Not continuing the DMA transfer, starting a new single-byte transfer
+					spi->spi->CR1 &= ~SPI_CR1_SPE;
+					
+					// Switch directions to read
+					spi->spi->CR1 |= SPI_CR1_BIDIMODE;
+					spi->spi->CR1 &= ~SPI_CR1_BIDIOE;
+					
+					// Start
+					spi->spi->CR1 |= SPI_CR1_SPE;
+					
+					spi_wait(spi);
+				}
+				
+				SPI_I2S_ClearITPendingBit(spi->spi, SPI_I2S_IT_RXNE);
+				SPI_I2S_ITConfig(spi->spi, SPI_I2S_IT_RXNE, ENABLE); 
+				
+				// Stop!
+				spi->spi->CR1 &= ~SPI_CR1_SPE;
+			}
+		}
+	}
+}
+
+void spi_rx_isr(spi_t *__restrict spi){
+	spi_transfer_t * const xfer = spi->xfer;
+	SPI_I2S_ClearITPendingBit(spi->spi, SPI_I2S_IT_RXNE);
+	SPI_I2S_ITConfig(spi->spi, SPI_I2S_IT_RXNE, DISABLE);
+	
+	spi->spi->CR1 &= ~SPI_CR1_BIDIMODE;
+	
+	// The last byte will be written at the write_count position
+	// If the last thing done was a write, this will be the correct position
+	// automatically.
+	// If there was a DMA read involved, the position will have been altered
+	// to be correct.
+	xfer->read_buff[xfer->write_count] = spi->spi->DR;
+	
+	// Nothing left to do, finish.
+	if(xfer->nss){
+		xfer->nss->gpio->BSRRL = xfer->nss->pin;
+	}
+	xfer->done = 1;
+	if(xfer->next){
+		spi_run_xfer(spi, xfer->next);
+	} else {
+		spi->xfer = NULL;
+	}
+	
+	spi->spi->CR1 |= SPI_CR1_SPE;
+}
+
+/*!
+ @brief ISR for 3-wire SPI
+ @param spi The SPI device
+ */
+void spi_tx_dma_isr(spi_t *__restrict spi){
+	spi_config_t const * const conf = spi->config;
+	spi_transfer_t * const xfer = spi->xfer;
+	if(DMA_GetITStatus(conf->dma_tx_stream, conf->dma_tx_tcif)){
+		conf->dma_rx_stream->CR &= ~DMA_SxCR_EN;
+		conf->dma_tx_stream->CR &= ~DMA_SxCR_EN;
+		
+		DMA_ClearFlag(conf->dma_rx_stream, conf->dma_rx_tc_flag);
+		DMA_ClearFlag(conf->dma_tx_stream, conf->dma_tx_tc_flag);
+		DMA_ClearITPendingBit(conf->dma_tx_stream, conf->dma_tx_tcif);
+		DMA_ClearITPendingBit(conf->dma_rx_stream, conf->dma_rx_tcif);
+		
+		DMA_ITConfig(conf->dma_tx_stream, DMA_IT_TC, DISABLE);
+		spi->spi->CR1 &= ~SPI_CR1_SPE;
+		
+		
+		if(xfer->read_count == 0){
+			// Done
+			if(spi->xfer->nss){
+				spi->xfer->nss->gpio->BSRRL = spi->xfer->nss->pin;
+			}
+			spi->spi->CR1 |= SPI_CR1_BIDIMODE;
+			spi->xfer->done = 1;
+			if(spi->xfer->next){
+				spi_run_xfer(spi, spi->xfer->next);
+			} else {
+				spi->xfer = NULL;
+			}
+			return;
+		}
+		
+		DMA_ITConfig(conf->dma_rx_stream, DMA_IT_TC, ENABLE);
+		
+		conf->dma_rx_stream->NDTR = spi->xfer->read_count;
+		conf->dma_tx_stream->NDTR = spi->xfer->read_count;
+		conf->dma_rx_stream->M0AR = (uint32_t)spi->xfer->read_buff + spi->xfer->write_count;
+		
+		
+		
+		// Switch directions to read
+		spi->spi->CR1 |= SPI_CR1_BIDIMODE;
+		spi->spi->CR1 &= ~SPI_CR1_BIDIOE;
+		
+		
+		spi->spi->CR1 |= SPI_CR1_SPE;
+	
+		// Mark that tx part is done
+		xfer->read_count = 0;
+		
+		conf->dma_rx_stream->CR |= DMA_SxCR_EN;
+		conf->dma_tx_stream->CR |= DMA_SxCR_EN;
+	}
+}
+
 

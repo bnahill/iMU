@@ -1,8 +1,10 @@
 #ifndef __LSM303_H_
 #define __LSM303_H_
 
-#include "stm32f4xx_conf.h"
 #include "sensor_config.h"
+#if USE_LSM303DLHC
+
+#include "stm32f4xx_conf.h"
 #include "i2c.h"
 
 typedef enum {
@@ -54,6 +56,8 @@ extern lsm303_t magacc2;
 
 void lsm303_init(void);
 void lsm303_read(void);
+
+#endif // USE_LSM303DLHC
 
 #endif
 

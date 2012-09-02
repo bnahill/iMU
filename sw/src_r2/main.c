@@ -24,7 +24,8 @@ int main(void){
 	GPIO_InitTypeDef GPIO_InitStructure;
 	SD_Error sderr;
 	SD_CardInfo ci;
-	printf("apple");
+
+	
 	// All GPIO clock enable
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA |
 	                       RCC_AHB1Periph_GPIOB |

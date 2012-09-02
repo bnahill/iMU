@@ -2,6 +2,7 @@
 #define __SENSOR_CONFIG_H_
 
 #include "toolchain.h"
+#include "stm32f4xx_conf.h"
 
 #ifndef BIT
 #define BIT(x) (1 << x)

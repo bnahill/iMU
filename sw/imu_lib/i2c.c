@@ -186,7 +186,7 @@ int i2c_init(i2c_t *i2c, i2c_mode_t mode, uint32_t speed){
 
  This is intended to be used internally to start each transfer
  */
-extern void inline i2c_run_xfer(i2c_t *i2c, i2c_transfer_t *xfer){
+inline extern void i2c_run_xfer(i2c_t *i2c, i2c_transfer_t *xfer){
 	i2c->xfer = xfer;
 	
 	i2c->state = I2C_ST_MASTER_REQ;
@@ -210,7 +210,7 @@ void i2c_transfer(i2c_t *i2c, i2c_transfer_t *xfer){
 		for(;old_xfer->next != NULL; old_xfer = old_xfer->next);
 		old_xfer->next = xfer;
 	} else {
-		i2c_run_xfer(i2c, xfer);	
+		i2c_run_xfer(i2c, xfer);
 	}
 	__enable_irq();
 }
@@ -277,20 +277,20 @@ void i2c_read(i2c_t *i2c, uint8_t devaddr, uint8_t addr, uint8_t *buffer, uint8_
 }
 */
 
-extern int inline i2c_check_evt(uint32_t event1, uint32_t event2){
+inline extern int i2c_check_evt(uint32_t event1, uint32_t event2){
 	if((event1 & event2) == event2)
 		return 1;
 	return 0;
 }
 
-extern void inline i2c_next_xfer(i2c_t *RESTRICT const i2c){
+inline extern void i2c_next_xfer(i2c_t *__restrict const i2c){
 	if(i2c->xfer->next){
 		i2c_run_xfer(i2c, i2c->xfer->next);
 	} else {
 		i2c->xfer = NULL;
 	}
 }
-extern void inline i2c_read_isr_evt(i2c_t *RESTRICT const i2c){
+inline extern void i2c_read_isr_evt(i2c_t *__restrict const i2c){
 	uint32_t const event = I2C_GetLastEvent(i2c->i2c);
 	switch(i2c->state){
 	case I2C_ST_MASTER_REQ:
@@ -350,7 +350,7 @@ extern void inline i2c_read_isr_evt(i2c_t *RESTRICT const i2c){
 
 }
 
-extern void inline i2c_write_isr_evt(i2c_t *RESTRICT const i2c){
+inline extern void i2c_write_isr_evt(i2c_t *__restrict const i2c){
 	uint32_t const event = I2C_GetLastEvent(i2c->i2c);
 	switch(i2c->state){
 	case I2C_ST_MASTER_REQ:
@@ -382,11 +382,11 @@ extern void inline i2c_write_isr_evt(i2c_t *RESTRICT const i2c){
 	}
 }
 
-extern void inline i2c_read_isr_err(i2c_t *RESTRICT const i2c){
+inline extern void i2c_read_isr_err(i2c_t *__restrict const i2c){
 	while(1);
 }
 
-extern void inline i2c_write_isr_err(i2c_t *RESTRICT const i2c){
+inline extern void i2c_write_isr_err(i2c_t *__restrict const i2c){
 	uint32_t const event = I2C_GetLastEvent(i2c->i2c);
 	switch(i2c->state){
 	case I2C_ST_IDLE:
@@ -410,7 +410,7 @@ extern void inline i2c_write_isr_err(i2c_t *RESTRICT const i2c){
 	}
 }
 	
-extern void inline i2c_isr_evt(i2c_t *RESTRICT const i2c){
+inline extern void i2c_isr_evt(i2c_t *__restrict const i2c){
 	switch(i2c->xfer->op){
 	case I2C_OP_WRITE:
 		i2c_write_isr_evt(i2c);
@@ -424,7 +424,7 @@ extern void inline i2c_isr_evt(i2c_t *RESTRICT const i2c){
 	}
 }
 
-extern void inline i2c_isr_err(i2c_t *RESTRICT i2c){
+inline extern void i2c_isr_err(i2c_t *__restrict i2c){
 	switch(i2c->xfer->op){
 	case I2C_OP_WRITE:
 		i2c_write_isr_err(i2c);

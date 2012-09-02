@@ -1,5 +1,5 @@
 #ifndef __L3GD20_H_
-#define __L3DG20_H_
+#define __L3GD20_H_
 
 #include "stm32f4xx_conf.h"
 #include "spi.h"
@@ -38,14 +38,6 @@ typedef struct {
 	uint8_t             r_buff[7];
 	spi_transfer_t      xfer;
 } l3gd20_t;
-
-#if HAS_GYRO_1
-extern l3gd20_t gyro1;
-#endif
-
-#if HAS_GYRO_2
-extern l3gd20_t gyro2;
-#endif
 
 /*!
  @brief Initialize all attached L3GD20 gyroscopes
