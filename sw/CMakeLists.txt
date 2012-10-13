@@ -341,13 +341,14 @@ set(CMSIS_DSP_SOURCES
 set(IMU_DIR imu_lib)
 
 set(IMU_SOURCES
-    ${IMU_DIR}/i2c.c
-    ${IMU_DIR}/spi.c
-    ${IMU_DIR}/l3gd20.c
-    ${IMU_DIR}/lsm303.c
-    ${IMU_DIR}/adxl345.c
-    ${IMU_DIR}/sdio.c
-    ${IMU_DIR}/sdio_ll.c
+    #${IMU_DIR}/i2c.cpp
+    ${IMU_DIR}/spi3.cpp
+    ${IMU_DIR}/spi4.cpp
+    ${IMU_DIR}/l3gd20.cpp
+    #${IMU_DIR}/lsm303.cpp
+    #${IMU_DIR}/adxl345.cpp
+    #${IMU_DIR}/sdio.cpp
+    #${IMU_DIR}/sdio_ll.cpp
 )
 
 if(${IMU} STREQUAL "r1")
@@ -369,13 +370,13 @@ set_property(SOURCE ${SYSTEM_DIR}/startup_stm32f4xx.s PROPERTY LANGUAGE C)
 
 if(${IMU} STREQUAL "r1")
   set(APP_SOURCES
-	  ${APP_DIR}/main.c
-	  ${APP_DIR}/tick.c
+	  ${APP_DIR}/main.cpp
+	  ${APP_DIR}/tick.cpp
   )
 elseif(${IMU} STREQUAL "r2")
  set(APP_SOURCES
-	  ${APP_DIR}/main.c
-	  ${APP_DIR}/tick.c
+	  ${APP_DIR}/main.cpp
+	  ${APP_DIR}/tick.cpp
   )
 endif()
 
@@ -399,7 +400,7 @@ add_library(std_periph STATIC ${STM_SOURCES})
 add_library(cmsis_dsp STATIC ${CMSIS_DSP_SOURCES})
 target_link_libraries(imu_lib std_periph)
 add_executable(${OUTFILE} ${APP_SOURCES} ${SYSTEM_SOURCES})
-target_link_libraries(${OUTFILE} std_periph cmsis_dsp imu_lib)
+target_link_libraries(${OUTFILE} std_periph cmsis_dsp imu_lib stdc++)
 
 # Funky workaround to make target dependent on linker script
 add_custom_command(OUTPUT link.ld COMMAND cat ${CMAKE_SOURCE_DIR}/stm32_flash.ld > link.ld DEPENDS ${CMAKE_SOURCE_DIR}/stm32_flash.ld)
@@ -407,8 +408,8 @@ add_custom_target(linker_script DEPENDS link.ld)
 add_dependencies(${OUTFILE} linker_script)
 
 # Warnings only for application code -- Optimizations only on ST/ARM code
-set_target_properties(${OUTFILE} PROPERTIES COMPILE_FLAGS "-W -O0")
-set_target_properties(imu_lib PROPERTIES COMPILE_FLAGS "-W -O0")
+set_target_properties(${OUTFILE} PROPERTIES COMPILE_FLAGS "-W -O2")
+set_target_properties(imu_lib PROPERTIES COMPILE_FLAGS "-W -O2")
 set_target_properties(std_periph PROPERTIES COMPILE_FLAGS "-w -O0")
 set_target_properties(cmsis_dsp PROPERTIES COMPILE_FLAGS "-w -O0")
 

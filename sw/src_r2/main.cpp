@@ -1,9 +1,13 @@
-#include "stm32f4xx_conf.h"
+extern "C" {
+	#include "stm32f4xx.h"
+}
 
 #include "tick.h"
 #include "l3gd20.h"
-#include "lsm303.h"
-#include "sdio.h"
+//#include "lsm303.h"
+//#include "sdio.h"
+#include "spi_platform.h"
+#include "l3gd20_platform.h"
 #include "stdlib.h"
 
 //! @defgroup util Utilities
@@ -22,9 +26,6 @@
 
 int main(void){
 	GPIO_InitTypeDef GPIO_InitStructure;
-	SD_Error sderr;
-	SD_CardInfo ci;
-
 	
 	// All GPIO clock enable
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA |
@@ -41,27 +42,20 @@ int main(void){
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_Init(LED_GPIO, &GPIO_InitStructure);
 	
+	spi1.init();
+	
 	// Configure SysTick for 400ms period	
-	if(!tick_start(400.0)){
+	if(!Tick::start(400.0)){
+		
 		while(1);
 	}
-/*	
-	if((SD_Init() == SD_OK) && SD_Detect()){
-		sderr = SD_GetCardInfo(&ci);
-		if(sderr == SD_OK){
-			while(1);
-		}
-	}
-*/	
 
-	lsm303_init();
-	l3gd20_init();
-
+	//l3gd20_init();
+	gyro1.init();
 	
 	while (1){
-		tick_wait(1);
-		l3gd20_read_sync();
-		lsm303_read();
+		Tick::wait(1);
+		//l3gd20_read_sync();
 	}
 }
 

@@ -2,7 +2,9 @@
 #define __SENSOR_CONFIG_H_
 
 #include "toolchain.h"
-#include "stm32f4xx_conf.h"
+extern "C" {
+	#include "stm32f4xx.h"
+}
 
 #ifndef BIT
 #define BIT(x) (1 << x)
@@ -12,6 +14,7 @@
 #define NULL ((void *) 0)
 #endif
 
+#define USE_L3GD20 1
 
 //////////////////////////////////////////////////////////////////////////////
 // STTS751

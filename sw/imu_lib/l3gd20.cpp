@@ -2,12 +2,18 @@
 
 #if USE_L3GD20
 
-#include "stm32f4xx_conf.h"
+extern "C" {
+	#include "stm32f4xx_conf.h"
+}
 
 #include "spi.h"
 #include "l3gd20.h"
 #include "l3gd20_private.h"
 
+
+
+
+#if 0
 
 //! A buffer for the command to read values from a gyroscope
 static uint8_t gyro_write_buffer[7];
@@ -30,17 +36,12 @@ static volatile int is_done;
 
 
 
-void l3gd20_read_sync(void){
-	l3gd20_read();
-	while(!l3gd20_transfer_complete());
-	l3gd20_update();
-}
+
 
 
 //////////////////////////////////////////////////////////////////////////////
 // Private support functions
 //////////////////////////////////////////////////////////////////////////////
-static void test();
 
 static void l3gd20_reset(l3gd20_t *__restrict gyro){
 	l3gd20_write_register(gyro, GYRO_REG_CTRL_REG5, 0x80);
@@ -166,9 +167,7 @@ static void l3gd20_transfer_sync(l3gd20_t *gyro, uint8_t *__restrict r_buff, uin
 	while(!xfer.done);
 }
 
-// Include the platform-specific components
-#define _L3GD20_C__
-#include "l3gd20_platform.h"
+
 
 static void test(){
 	uint8_t rb[66], wb = 0xC0;
@@ -183,6 +182,11 @@ static void test(){
 	spi_transfer(gyro1.spi, &xfer);
 	while(!xfer.done);
 }
+#endif
+
+// Include the platform-specific components
+#define __L3GD20_CPP_
+#include "l3gd20_platform.h"
 
 #endif // USE_L3GD20
 

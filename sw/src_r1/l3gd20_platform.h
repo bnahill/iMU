@@ -24,6 +24,8 @@ l3gd20_t gyro1 = {
 	.spi = &spi1
 };
 
+
+
 void l3gd20_init(void){
 	spi_init_slave(&gyro1.nss);
 	l3gd20_device_init(&gyro1);

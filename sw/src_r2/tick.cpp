@@ -4,9 +4,9 @@
 #define SYSTICK_MS(ms) ((ms*SystemCoreClock) / 8000.0)
 
 //! The actual tick resource
-static volatile int tick;
+volatile int Tick::tick;
 
-int tick_start(float period_ms){
+int Tick::start(float period_ms){
 	if(SysTick_Config(SYSTICK_MS(period_ms)))
 		return 0;
 	tick = 0;
@@ -15,13 +15,17 @@ int tick_start(float period_ms){
 	return 1;
 }
 
-void tick_wait(uint32_t num_ticks){
+void Tick::wait(uint32_t num_ticks){
 	while(num_ticks--){
-		while(tick == 0);
+		while(tick);
 		tick = 0;
 	}
 }
 
+extern "C"{
+	void SysTick_Handler(void);
+}
+
 void SysTick_Handler(void){
-	tick = 1;
+	Tick::tick = 1;
 }
