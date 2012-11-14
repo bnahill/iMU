@@ -75,13 +75,17 @@ extern "C" {
 	#error "SDIO and I2C3 cannot be used at the same time"
 #endif
 
-typedef struct {
+typedef struct af_gpio_pin {
+	af_gpio_pin(GPIO_TypeDef *_gpio, uint16_t _pin, uint8_t _pinsrc) :
+		gpio(_gpio), pin(_pin), pinsrc(_pinsrc){}
 	GPIO_TypeDef *const gpio;
 	uint16_t const pin;
 	uint8_t const pinsrc;
 } af_gpio_pin_t;
 
-typedef struct {
+typedef struct gpio_pin {
+	gpio_pin(GPIO_TypeDef *_gpio, uint16_t _pin) :
+		gpio(_gpio), pin(_pin){}
 	GPIO_TypeDef *const gpio;
 	uint16_t const pin;
 } gpio_pin_t;

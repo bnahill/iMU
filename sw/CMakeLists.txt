@@ -33,11 +33,10 @@ set(STD_PERIPH_DIR STM32F4xx_StdPeriph_Driver)
 set(CMSIS_DIR CMSIS)
 set(MCU cortex-m4)
 
-
 set(MCFLAGS "-mcpu=${MCU} -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard")
 
 add_definitions(${MCFLAGS})
-add_definitions(-g -ffunction-sections  -fdata-sections -Wredundant-decls -Wshadow -Wcast-qual -Wcast-align)
+add_definitions(-g -ffunction-sections  -fdata-sections -Wredundant-decls -Wcast-qual -Wcast-align)
 add_definitions(-DUSE_STDPERIPH_DRIVER -DSTM32F4XX -DHSE_VALUE=8000000 -DARM_MATH_CM4 -D__FPU_PRESENT)
 
 
@@ -52,10 +51,10 @@ endif()
 
 
 # Eliminate the need for a bunch of extra support code that may not work on the chip anyways
-set(CMAKE_CXX_FLAGS "--std=c++0x -fno-rtti -fno-exceptions")
+set(CMAKE_CXX_FLAGS "-flto --std=c++0x -fno-rtti -fno-exceptions")
 # Use the new C11 standard
-set(CMAKE_C_FLAGS "--std=c1x")
-set(CMAKE_EXE_LINKER_FLAGS "-Tlink.ld -flto  -Wl,-Map=${TARGET}.map,--cref,--gc-sections -nostdlib ${MCFLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
+set(CMAKE_C_FLAGS "--std=c1x -flto")
+set(CMAKE_EXE_LINKER_FLAGS "-Tlink.ld -flto -O2 -Wl,-Map=${TARGET}.map,--cref,--gc-sections ${MCFLAGS} ${CMAKE_EXE_LINKER_FLAGS}")
 
 set(STD_PERIPH_SRC_DIR ${STD_PERIPH_DIR}/src)
 
@@ -341,9 +340,10 @@ set(CMSIS_DSP_SOURCES
 set(IMU_DIR imu_lib)
 
 set(IMU_SOURCES
-    #${IMU_DIR}/i2c.cpp
-    ${IMU_DIR}/spi3.cpp
+	${IMU_DIR}/i2c.cpp
+	${IMU_DIR}/spi3.cpp
     ${IMU_DIR}/spi4.cpp
+	${IMU_DIR}/mma8452q.cpp
     ${IMU_DIR}/l3gd20.cpp
     #${IMU_DIR}/lsm303.cpp
     #${IMU_DIR}/adxl345.cpp
@@ -400,7 +400,7 @@ add_library(std_periph STATIC ${STM_SOURCES})
 add_library(cmsis_dsp STATIC ${CMSIS_DSP_SOURCES})
 target_link_libraries(imu_lib std_periph)
 add_executable(${OUTFILE} ${APP_SOURCES} ${SYSTEM_SOURCES})
-target_link_libraries(${OUTFILE} std_periph cmsis_dsp imu_lib stdc++)
+target_link_libraries(${OUTFILE} imu_lib std_periph cmsis_dsp stdc++)
 
 # Funky workaround to make target dependent on linker script
 add_custom_command(OUTPUT link.ld COMMAND cat ${CMAKE_SOURCE_DIR}/stm32_flash.ld > link.ld DEPENDS ${CMAKE_SOURCE_DIR}/stm32_flash.ld)
@@ -410,8 +410,8 @@ add_dependencies(${OUTFILE} linker_script)
 # Warnings only for application code -- Optimizations only on ST/ARM code
 set_target_properties(${OUTFILE} PROPERTIES COMPILE_FLAGS "-W -O2")
 set_target_properties(imu_lib PROPERTIES COMPILE_FLAGS "-W -O2")
-set_target_properties(std_periph PROPERTIES COMPILE_FLAGS "-w -O0")
-set_target_properties(cmsis_dsp PROPERTIES COMPILE_FLAGS "-w -O0")
+set_target_properties(std_periph PROPERTIES COMPILE_FLAGS "-w -O2")
+set_target_properties(cmsis_dsp PROPERTIES COMPILE_FLAGS "-w -O2")
 
 ##############################################################
 # Ctags

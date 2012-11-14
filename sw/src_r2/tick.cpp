@@ -17,7 +17,7 @@ int Tick::start(float period_ms){
 
 void Tick::wait(uint32_t num_ticks){
 	while(num_ticks--){
-		while(tick);
+		while(!tick);
 		tick = 0;
 	}
 }

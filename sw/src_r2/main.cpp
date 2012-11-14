@@ -9,19 +9,20 @@ extern "C" {
 #include "spi_platform.h"
 #include "l3gd20_platform.h"
 #include "stdlib.h"
+#include "mma8452q_platform.h"
 
 //! @defgroup util Utilities
 
 //! @name LED macros
 //! @{
-#define LED_GPIO GPIOD
-#define LED_PIN(x) (GPIO_Pin_12 << x)
-#define LED_PIN_ALL (LED_PIN(0) | LED_PIN(1) | LED_PIN(2))
+#define LED_GPIO GPIOC
+#define LED_PIN(x) (1 << x)
+#define LED_PIN_ALL (LED_PIN(3))
 
-#define LED_SET(x)    (LED_GPIO->ODR |= LED_PIN(x))
-#define LED_SET_ALL() (LED_GPIO->ODR |= LED_PIN_ALL)
-#define LED_CLR(x)    (LED_GPIO->ODR &= ~LED_PIN(x))
-#define LED_CLR_ALL() (LED_GPIO->ODR &= ~LED_PIN_ALL)
+#define LED_SET(x)    (LED_GPIO->BSRRL = LED_PIN(x))
+#define LED_SET_ALL() (LED_GPIO->BSRRL = LED_PIN_ALL)
+#define LED_CLR(x)    (LED_GPIO->BSRRH = LED_PIN(x))
+#define LED_CLR_ALL() (LED_GPIO->BSRRH = LED_PIN_ALL)
 //! @}
 
 int main(void){
@@ -42,19 +43,24 @@ int main(void){
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_Init(LED_GPIO, &GPIO_InitStructure);
 	
-	spi1.init();
+	acc1.init();
+	
+	//spi1.init();
 	
 	// Configure SysTick for 400ms period	
-	if(!Tick::start(400.0)){
+	if(!Tick::start(100.0)){
 		
 		while(1);
 	}
 
 	//l3gd20_init();
-	gyro1.init();
+	//gyro1.init();
 	
 	while (1){
-		Tick::wait(1);
+		Tick::wait(5);
+		LED_SET_ALL();
+		Tick::wait(5);
+		LED_CLR_ALL();
 		//l3gd20_read_sync();
 	}
 }
